@@ -3,26 +3,27 @@
 Take control of your social media feeds. Block algorithmic recommendations, Shorts, Reels, suggested content, comments, and more on YouTube and Instagram. Works seamlessly with SPA navigation — no page reload required.
 
 
-#### Get it on:
+### Get it on:
 <p align="center">
   <a href="https://addons.mozilla.org/en-US/firefox/addon/feed-free-uf/">
-    <img src="https://img.shields.io/badge/FIREFOX%20ADD--ON-v1.4.0-FF7139?style=flat&logo=firefoxbrowser&logoColor=white" alt="Firefox Add-on" height="27" />
+    <img src="https://img.shields.io/badge/FIREFOX%20ADD--ON-v1.4.0-FF7139?style=flat&logo=firefoxbrowser&logoColor=white" alt="Firefox Add-on" height="23.67" />
   </a>
   &nbsp;&nbsp;
   <a href="https://chromewebstore.google.com/detail/feed-free-unbiased-feed-f/fmmfdjmmjmkedafmhhdmoafbioakeefp">
-    <img src="https://img.shields.io/badge/CHROME%20WEB%20STORE-v1.4.1-4285F4?style=flat&logo=googlechrome&logoColor=white" alt="Chrome Web Store" height="27" />
+    <img src="https://img.shields.io/badge/CHROME%20WEB%20STORE-v1.4.1-4285F4?style=flat&logo=googlechrome&logoColor=white" alt="Chrome Web Store" height="23.67" />
   </a>
 </p>
 
 <p align="center">
-  <img src="assets/youtube.png" alt="YouTube Feed Free" width="45%" style="border-radius: 4.5px; margin-right: 2px;" />
-  <img src="assets/instagram.png" alt="Instagram Feed Free" width="45%" style="border-radius: 4.5px;" />
+  <img src="assets/youtube.png" alt="YouTube Feed Free" width="36%" />
+  &nbsp;
+  <img src="assets/instagram.png" alt="Instagram Feed Free" width="36%" />
   <br>
   <em>Updated Popup UI with YouTube (dark theme) and Instagram (light theme) controls, theme toggle & site selector.</em>
 </p>
 
 <p align="center">
-  <img src="assets/oops.png" alt="Unsupported Site" width="54%" style="border-radius: 6.7px;" />
+  <img src="assets/oops.png" alt="Unsupported Site" width="36%" />
   <br>
   <em>Oops page with default message.</em>
 </p>
