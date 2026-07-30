@@ -17,7 +17,6 @@ export type YouTubeRuleKey =
   | 'moreFromYouTube'
   | 'shortsProfiles'
   | 'searchShorts'
-  | 'mobileOverflowFix'
 
 export interface ActiveRule {
   name: YouTubeRuleKey
@@ -40,7 +39,6 @@ const RULE_MAP: Record<YouTubeRuleKey, string> = {
   moreFromYouTube: 'moreFromYouTube',
   shortsProfiles: 'shortsProfiles',
   searchShorts: 'searchShorts',
-  mobileOverflowFix: 'mobileOverflowFix',
 }
 
 export function getActiveRules(state: FeedFreeState): ActiveRule[] {
@@ -136,20 +134,6 @@ export function getActiveRules(state: FeedFreeState): ActiveRule[] {
     rules.push({
       name: 'grayMode',
       selectors: getSelectorEntries('youtube', RULE_MAP.grayMode),
-    })
-  }
-
-  if (window.location.hostname === 'm.youtube.com') {
-    rules.push({
-      name: 'mobileOverflowFix',
-      selectors: [
-        {
-          selector: 'html, body',
-          fallbacks: ['#app', 'ytm-app'],
-          property: 'overflow-x',
-          value: 'hidden',
-        }
-      ]
     })
   }
 

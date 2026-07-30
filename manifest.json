@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Feed Free - Unbiased Feed (FF - UF)",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Take control of your feed. Block algorithmic recommendations, shorts, reels, and more on YouTube and Instagram.",
   "icons": {
     "16": "icons/icon16.png",
@@ -13,8 +13,10 @@
     "storage"
   ],
   "host_permissions": [
-    "https://*.youtube.com/*",
-    "https://*.instagram.com/*"
+    "https://www.youtube.com/*",
+    "https://youtube.com/*",
+    "https://www.instagram.com/*",
+    "https://instagram.com/*"
   ],
   "action": {
     "default_popup": "src/popup/index.html",
@@ -33,17 +35,17 @@
   "content_scripts": [
     {
       "js": ["src/bootstrap/antiflicker.ts"],
-      "matches": ["https://*.youtube.com/*", "https://*.instagram.com/*"],
+      "matches": ["https://www.youtube.com/*", "https://youtube.com/*", "https://www.instagram.com/*", "https://instagram.com/*"],
       "run_at": "document_start"
     },
     {
       "js": ["src/content/youtube/index.ts"],
-      "matches": ["https://*.youtube.com/*"],
+      "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
       "run_at": "document_idle"
     },
     {
       "js": ["src/content/instagram/index.ts"],
-      "matches": ["https://*.instagram.com/*"],
+      "matches": ["https://www.instagram.com/*", "https://instagram.com/*"],
       "run_at": "document_idle"
     }
   ],
