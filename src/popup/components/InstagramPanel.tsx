@@ -164,9 +164,9 @@ export function InstagramPanel() {
       {/* Appearance Modes */}
       <Row
         label="Grayscale Mode"
-        hint="Turn Instagram completely black & white"
+        hint="Turn Instagram completely black & white (Press 'G' to toggle)"
         checked={state.instagram.grayMode}
-        disabled={disabled}
+        disabled={false}
         activeColor={activeColor}
         isLast
         onChange={(v) => setInstagram({ grayMode: v })}

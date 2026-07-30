@@ -1,5 +1,5 @@
 import { loadState, onStateChanged, pollState, saveState } from '../../utils/storage'
-import { updateStyles, unmountAll, removeAntiflicker } from '../shared/injector'
+import { updateStyles, removeAntiflicker } from '../shared/injector'
 import { DOMPatron } from '../shared/patron'
 import { getActiveRules } from './rules'
 import type { FeedFreeState } from '../../types'
@@ -225,9 +225,8 @@ function attachMusicToggleDrag(
 }
 
 function manageMusicOverlay(state: FeedFreeState): void {
-  const isGlobalEnabled = state.globalEnabled
-  const isMusicOnly = isGlobalEnabled && state.youtube.musicOnlyMode
-  const showOverlay = isGlobalEnabled && state.youtube.musicOnlyShowOverlay
+  const isMusicOnly = state.youtube.musicOnlyMode
+  const showOverlay = state.youtube.musicOnlyShowOverlay
 
   const player = document.getElementById('movie_player') || document.querySelector('.html5-video-player')
   const existingOverlay = document.getElementById('ff-music-overlay')
@@ -235,7 +234,7 @@ function manageMusicOverlay(state: FeedFreeState): void {
 
   // Helper to ensure style injection
   const styleId = 'ff-music-ui-style'
-  if (isGlobalEnabled && !document.getElementById(styleId)) {
+  if (!document.getElementById(styleId)) {
     const style = document.createElement('style')
     style.id = styleId
     style.textContent = `
@@ -388,10 +387,9 @@ function manageMusicOverlay(state: FeedFreeState): void {
     }
   }
 
-  if (!isGlobalEnabled || !player) {
+  if (!player) {
     existingOverlay?.remove()
     existingToggle?.remove()
-    player?.classList.remove('ff-music-no-overlay')
     return
   }
 
@@ -624,7 +622,7 @@ function injectShadowStyles(state: FeedFreeState): void {
   }
 }
 
-let cleanupInterval: ReturnType<typeof setInterval> | null = null
+
 
 function restoreYouTubeEndScreensJS(): void {
   try {
@@ -800,7 +798,6 @@ function showShortsNotification(): void {
 
 function applyRules(state: FeedFreeState): void {
   currentState = state
-  if (!state.globalEnabled) return
 
   const rules = getActiveRules(state)
   log('applyRules — globalEnabled:', state.globalEnabled, 'activeRules:', rules.map(r => r.name))
@@ -809,8 +806,12 @@ function applyRules(state: FeedFreeState): void {
     removeAntiflicker()
     manageMusicOverlay(state)
     injectShadowStyles(state)
-    hideYouTubeEndScreensJS()
-    checkAndShowShortsSearchNotification()
+    if (state.globalEnabled) {
+      hideYouTubeEndScreensJS()
+      checkAndShowShortsSearchNotification()
+    } else {
+      restoreYouTubeEndScreensJS()
+    }
     if (stylesChanged) {
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'))
@@ -821,49 +822,6 @@ function applyRules(state: FeedFreeState): void {
   }
 }
 
-function teardownAll(): void {
-  unmountAll()
-  restoreYouTubeEndScreensJS()
-  document.getElementById('ff-music-overlay')?.remove()
-  document.getElementById('ff-music-toggle-btn')?.remove()
-  document.getElementById('ff-music-ui-style')?.remove()
-  if (currentToastElement) {
-    currentToastElement.remove()
-    currentToastElement = null
-  }
-  const player = document.getElementById('movie_player') || document.querySelector('.html5-video-player')
-  player?.classList.remove('ff-music-no-overlay')
-  if (cleanupInterval !== null) {
-    clearInterval(cleanupInterval)
-    cleanupInterval = null
-  }
-  try {
-    const shadowRoots: ShadowRoot[] = []
-    const traverse = (current: Document | ShadowRoot) => {
-      const elements = current.querySelectorAll('*')
-      for (let i = 0; i < elements.length; i++) {
-        const el = elements[i]
-        if (el.shadowRoot) {
-          shadowRoots.push(el.shadowRoot)
-          traverse(el.shadowRoot)
-        }
-      }
-    }
-    traverse(document)
-
-    shadowRoots.forEach((shadow) => {
-      shadow.getElementById('ff-shadow-styles')?.remove()
-    })
-  } catch (e) {
-    err('Failed to clean shadow styles:', e)
-  }
-  patrol?.disconnect()
-  patrol = null
-  if (heartbeat !== null) {
-    clearInterval(heartbeat)
-    heartbeat = null
-  }
-}
 
 function setupPatron(): void {
   if (patrol) return
@@ -884,28 +842,21 @@ function setupHeartbeat(): void {
   if (heartbeat) return
   heartbeat = setInterval(() => {
     try {
-      if (!currentState?.globalEnabled) return
+      if (!currentState) return
       manageMusicOverlay(currentState)
       injectShadowStyles(currentState)
-      hideYouTubeEndScreensJS()
+      if (currentState.globalEnabled) {
+        hideYouTubeEndScreensJS()
+      } else {
+        restoreYouTubeEndScreensJS()
+      }
 
       const rules = getActiveRules(currentState)
-      if (rules.length === 0) return
-      log('Heartbeat — re-applying rules')
       updateStyles(rules)
     } catch (e) {
       err('Heartbeat failed:', e)
     }
-  }, 3000)
-}
-
-function setupCleanupInterval(): void {
-  if (cleanupInterval) return
-  cleanupInterval = setInterval(() => {
-    if (currentState?.globalEnabled) {
-      hideYouTubeEndScreensJS()
-    }
-  }, 1000)
+  }, 2500)
 }
 
 function handleStateChange(state: FeedFreeState): void {
@@ -919,15 +870,9 @@ function handleStateChange(state: FeedFreeState): void {
     log('handleStateChange — globalEnabled:', state.globalEnabled, 'youtube:', state.youtube)
     currentState = state
 
-    if (!state.globalEnabled) {
-      teardownAll()
-      return
-    }
-
     applyRules(state)
     setupPatron()
     setupHeartbeat()
-    setupCleanupInterval()
   } catch (e) {
     err('handleStateChange failed:', e)
   }
@@ -1042,12 +987,28 @@ async function toggleAudioOnlyMode(): Promise<void> {
   }
 }
 
+async function toggleGrayModeYouTube(): Promise<void> {
+  try {
+    const s = await loadState()
+    const nextMode = !s.youtube.grayMode
+    s.youtube.grayMode = nextMode
+    await saveState(s)
+    showFeedFreeToast(nextMode ? 'Grayscale Mode: Enabled 🌓' : 'Grayscale Mode: Disabled 🎨')
+  } catch (e) {
+    err('Failed to toggle grayMode via shortcut:', e)
+  }
+}
+
 function handleKeyboardShortcut(e: KeyboardEvent): void {
-  if (!currentState || !currentState.globalEnabled) return
-  if ((e.key === 'a' || e.key === 'A') && !isUserTyping() && !e.ctrlKey && !e.altKey && !e.metaKey) {
+  if (!currentState || isUserTyping() || e.ctrlKey || e.altKey || e.metaKey) return
+  if (e.key === 'a' || e.key === 'A') {
     e.preventDefault()
     e.stopPropagation()
     toggleAudioOnlyMode()
+  } else if (e.key === 'g' || e.key === 'G') {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleGrayModeYouTube()
   }
 }
 
@@ -1068,12 +1029,9 @@ async function init(): Promise<void> {
       pendingState = null
     } else {
       currentState = state
-      if (state.globalEnabled) {
-        applyRules(state)
-        setupPatron()
-        setupHeartbeat()
-        setupCleanupInterval()
-      }
+      applyRules(state)
+      setupPatron()
+      setupHeartbeat()
     }
 
     document.addEventListener('yt-navigate-finish', onYouTubeNavigate)

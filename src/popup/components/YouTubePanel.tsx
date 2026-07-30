@@ -118,7 +118,7 @@ export function YouTubePanel() {
         label="Audio Only Mode"
         hint="Black out video, keep audio playing (Press 'A' on page to toggle)"
         checked={state.youtube.musicOnlyMode}
-        disabled={disabled}
+        disabled={false}
         activeColor={activeColor}
         onChange={(v) => setYouTube({ musicOnlyMode: v })}
       />
@@ -128,7 +128,7 @@ export function YouTubePanel() {
             label="Show Audio Only Overlay"
             hint="Display visualizer & controls on black screen"
             checked={state.youtube.musicOnlyShowOverlay}
-            disabled={disabled}
+            disabled={false}
             activeColor={activeColor}
             onChange={(v) => setYouTube({ musicOnlyShowOverlay: v })}
           />
@@ -136,9 +136,9 @@ export function YouTubePanel() {
       )}
       <Row
         label="Grayscale Mode"
-        hint="Turn YouTube completely black & white"
+        hint="Turn YouTube completely black & white (Press 'G' to toggle)"
         checked={state.youtube.grayMode}
-        disabled={disabled}
+        disabled={false}
         activeColor={activeColor}
         isLast
         onChange={(v) => setYouTube({ grayMode: v })}

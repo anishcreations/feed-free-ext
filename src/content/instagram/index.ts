@@ -1,5 +1,5 @@
-import { loadState, onStateChanged, pollState } from '../../utils/storage'
-import { updateStyles, unmountAll, removeAntiflicker } from '../shared/injector'
+import { loadState, saveState, onStateChanged, pollState } from '../../utils/storage'
+import { updateStyles, removeAntiflicker } from '../shared/injector'
 import { DOMPatron } from '../shared/patron'
 import { getActiveRules } from './rules'
 import type { FeedFreeState } from '../../types'
@@ -150,7 +150,7 @@ function handleRedirect(state: FeedFreeState): boolean {
   return false
 }
 
-let cleanupInterval: ReturnType<typeof setInterval> | null = null
+
 
 function findActionSection(article: HTMLElement): HTMLElement | null {
   const svgs = article.querySelectorAll('svg')
@@ -738,35 +738,24 @@ function hideInstagramCommentsJS(): void {
 
 function applyRules(state: FeedFreeState): void {
   currentState = state
-  if (!state.globalEnabled) return
 
   const rules = getActiveRules(state)
   log('applyRules — globalEnabled:', state.globalEnabled, 'activeRules:', rules.map(r => r.name))
   try {
     updateStyles(rules)
     removeAntiflicker()
-    hideInstagramCommentsJS()
-    hideInstagramLikesJS()
+    if (state.globalEnabled) {
+      hideInstagramCommentsJS()
+      hideInstagramLikesJS()
+    } else {
+      restoreInstagramCommentsJS()
+      restoreInstagramLikesJS()
+    }
   } catch (e) {
     err('applyRules failed:', e)
   }
 }
 
-function teardownAll(): void {
-  unmountAll()
-  restoreInstagramCommentsJS()
-  restoreInstagramLikesJS()
-  if (cleanupInterval !== null) {
-    clearInterval(cleanupInterval)
-    cleanupInterval = null
-  }
-  patrol?.disconnect()
-  patrol = null
-  if (heartbeat !== null) {
-    clearInterval(heartbeat)
-    heartbeat = null
-  }
-}
 
 function setupPatron(): void {
   if (patrol) return
@@ -787,29 +776,22 @@ function setupHeartbeat(): void {
   if (heartbeat) return
   heartbeat = setInterval(() => {
     try {
-      if (!currentState?.globalEnabled) return
+      if (!currentState) return
       const redirected = handleRedirect(currentState)
       if (redirected) return
       const rules = getActiveRules(currentState)
-      if (rules.length === 0) return
-      log('Heartbeat — re-applying rules')
       updateStyles(rules)
-      hideInstagramCommentsJS()
-      hideInstagramLikesJS()
+      if (currentState.globalEnabled) {
+        hideInstagramCommentsJS()
+        hideInstagramLikesJS()
+      } else {
+        restoreInstagramCommentsJS()
+        restoreInstagramLikesJS()
+      }
     } catch (e) {
       err('Heartbeat failed:', e)
     }
-  }, 3000)
-}
-
-function setupCleanupInterval(): void {
-  if (cleanupInterval) return
-  cleanupInterval = setInterval(() => {
-    if (currentState?.globalEnabled) {
-      hideInstagramCommentsJS()
-      hideInstagramLikesJS()
-    }
-  }, 1000)
+  }, 2500)
 }
 
 function handleStateChange(state: FeedFreeState): void {
@@ -823,17 +805,11 @@ function handleStateChange(state: FeedFreeState): void {
     log('handleStateChange — globalEnabled:', state.globalEnabled, 'instagram:', state.instagram)
     currentState = state
 
-    if (!state.globalEnabled) {
-      teardownAll()
-      return
-    }
-
     const redirected = handleRedirect(state)
     if (!redirected) applyRules(state)
 
     setupPatron()
     setupHeartbeat()
-    setupCleanupInterval()
   } catch (e) {
     err('handleStateChange failed:', e)
   }
@@ -855,6 +831,96 @@ function setupMessageListener(): void {
   })
 }
 
+function isUserTyping(): boolean {
+  const active = document.activeElement
+  if (!active) return false
+  const tagName = active.tagName.toLowerCase()
+  return (
+    tagName === 'input' ||
+    tagName === 'textarea' ||
+    active.hasAttribute('contenteditable') ||
+    active.getAttribute('role') === 'textbox'
+  )
+}
+
+let activeFeedFreeToast: HTMLDivElement | null = null
+
+function showFeedFreeToast(message: string): void {
+  if (activeFeedFreeToast) {
+    activeFeedFreeToast.remove()
+  }
+
+  const toast = document.createElement('div')
+  toast.id = 'ff-status-toast'
+
+  const isDark = document.documentElement.hasAttribute('dark') ||
+    getComputedStyle(document.body).backgroundColor !== 'rgb(255, 255, 255)'
+
+  Object.assign(toast.style, {
+    position: 'fixed',
+    bottom: '60px',
+    left: '50%',
+    transform: 'translateX(-50%) translateY(20px)',
+    backgroundColor: isDark ? 'rgba(33, 33, 33, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+    color: isDark ? '#ffffff' : '#0f0f0f',
+    padding: '10px 18px',
+    borderRadius: '24px',
+    fontSize: '13px',
+    fontWeight: '600',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+    border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.05)',
+    zIndex: '100000',
+    opacity: '0',
+    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  })
+
+  toast.textContent = message
+  document.body.appendChild(toast)
+  activeFeedFreeToast = toast
+
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateX(-50%) translateY(0)'
+    toast.style.opacity = '1'
+  })
+
+  setTimeout(() => {
+    toast.style.transform = 'translateX(-50%) translateY(20px)'
+    toast.style.opacity = '0'
+    setTimeout(() => {
+      toast.remove()
+      if (activeFeedFreeToast === toast) {
+        activeFeedFreeToast = null
+      }
+    }, 250)
+  }, 2000)
+}
+
+async function toggleGrayModeInstagram(): Promise<void> {
+  try {
+    const s = await loadState()
+    const nextMode = !s.instagram.grayMode
+    s.instagram.grayMode = nextMode
+    await saveState(s)
+    showFeedFreeToast(nextMode ? 'Grayscale Mode: Enabled 🌓' : 'Grayscale Mode: Disabled 🎨')
+  } catch (e) {
+    err('Failed to toggle grayMode via shortcut:', e)
+  }
+}
+
+function handleKeyboardShortcut(e: KeyboardEvent): void {
+  if (!currentState || isUserTyping() || e.ctrlKey || e.altKey || e.metaKey) return
+  if (e.key === 'g' || e.key === 'G') {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleGrayModeInstagram()
+  }
+}
+
 async function init(): Promise<void> {
   log('Content script starting...')
   setupMessageListener()
@@ -871,15 +937,13 @@ async function init(): Promise<void> {
       pendingState = null
     } else {
       currentState = state
-      if (state.globalEnabled) {
-        const redirected = handleRedirect(state)
-        if (!redirected) applyRules(state)
-        setupPatron()
-        setupHeartbeat()
-        setupCleanupInterval()
-      }
+      const redirected = handleRedirect(state)
+      if (!redirected) applyRules(state)
+      setupPatron()
+      setupHeartbeat()
     }
 
+    document.addEventListener('keydown', handleKeyboardShortcut)
     onStateChanged(handleStateChange)
     pollState(handleStateChange)
     log('Content script initialized')

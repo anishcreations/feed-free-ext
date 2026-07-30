@@ -44,6 +44,22 @@ const RULE_MAP: Record<YouTubeRuleKey, string> = {
 export function getActiveRules(state: FeedFreeState): ActiveRule[] {
   const rules: ActiveRule[] = []
 
+  if (!state.globalEnabled) {
+    if (state.youtube.musicOnlyMode) {
+      rules.push({
+        name: 'musicOnly',
+        selectors: getSelectorEntries('youtube', RULE_MAP.musicOnly),
+      })
+    }
+    if (state.youtube.grayMode) {
+      rules.push({
+        name: 'grayMode',
+        selectors: getSelectorEntries('youtube', RULE_MAP.grayMode),
+      })
+    }
+    return rules
+  }
+
   const isHomepage = window.location.pathname === '/' || window.location.pathname === ''
 
   if (state.youtube.nukeHomeFeed && isHomepage) {

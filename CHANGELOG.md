@@ -4,8 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+*(follows semantic versioning from v1.3.0 onwards)*
 
 ---
+
+## [v1.4.0] - 2026-07-30
+
+### Added
+- **Grayscale Shortcut ('G')**: Added `'G'` keyboard shortcut on both YouTube and Instagram to toggle Grayscale Mode dynamically with toast notification feedback.
+- **Floating Glassmorphic Scrollbar**: Redesigned the popup scrollbar to be an ultra-subtle, floating glass pill with translucent opacity and smooth hover transitions.
+
+### Changed
+- **Independent Audio & Grayscale Modes**: Audio Only Mode (YouTube) and Grayscale Mode (YouTube & Instagram) now run independently of the global Feed Free toggle, allowing them to stay active or be toggled via keyboard shortcuts anytime.
 
 ## [v1.3.1] - 2026-07-30
 

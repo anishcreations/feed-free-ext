@@ -25,7 +25,7 @@ async function persist(
 async function broadcast(state: FeedFreeState): Promise<void> {
   try {
     const tabs = await chrome.tabs.query({
-      url: ['*://*.youtube.com/*', '*://*.instagram.com/*'],
+      url: ['*://www.youtube.com/*', '*://youtube.com/*', '*://www.instagram.com/*', '*://instagram.com/*'],
     })
     for (const tab of tabs) {
       if (tab.id) {

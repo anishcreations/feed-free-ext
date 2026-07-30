@@ -46,8 +46,8 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 - **Hide Report History** — Remove Report History link from guide/sidebar.
 - **Hide Notifications** — Remove the notifications bell and activity links from the top bar and sidebar.
 - **Hide More from YouTube** — Remove the "More from YouTube" category block from the guide/sidebar.
-- **Audio Only Mode** — Black out the video player (keep audio playing) with a **draggable** floating toggle button on the player UI to switch back-and-forth directly, an optional screen visual overlay, and a keyboard shortcut (`'A'`) with a floating visual toast notification.
-- **Grayscale Mode** — Turn YouTube completely black & white.
+- **Audio Only Mode** — Black out the video player (keep audio playing) with a **draggable** floating toggle button on the player UI to switch back-and-forth directly, an optional screen visual overlay, independent execution from master switch, and keyboard shortcut (`'A'`) with floating toast notification.
+- **Grayscale Mode ('G')** — Turn YouTube completely black & white with keyboard shortcut (`'G'`) and floating toast notification.
 
 ### Instagram
 - **Following Feed** — Auto-redirect to the Following timeline instead of the algorithmic Home feed.
@@ -63,16 +63,16 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 - **Hide Comments & Likes Count** — Hide comment sections, comments count, and post likes count (while keeping the interactive Like, Comment, Share, and Save button icons visible).
 - **Hide Notifications** — Remove notifications tab from sidebar, hide floating notification tooltips (Like/Comment/Follow popups), and strip unread badges.
 - **Conflict Resolution** — Choose redirect target (Profile or Saved) when both "Redirect to DMs" and "Hide DMs" are enabled simultaneously.
-- **Grayscale Mode** — Turn Instagram completely black & white.
+- **Grayscale Mode ('G')** — Turn Instagram completely black & white with keyboard shortcut (`'G'`) and floating toast notification.
 
 ### Global
-- **Master toggle** — Enable/disable all blocking at once (Feed Free Active / Inactive).
+- **Master toggle** — Enable/disable all feed blocking at once (Feed Free Active / Inactive).
+- **Independent Appearance Modes** — Audio Only Mode & Grayscale Mode run independently of master toggle so you can stay in dark/black-and-white mode anytime via shortcuts `'A'` and `'G'`.
 - **Auto Site Detection & Selector** — Smart platform detection with a manual dropdown to switch between YouTube, Instagram, or Auto mode. Shows a friendly unsupported site message with supported platform info when visiting other sites.
 - **Light/Dark Theme Toggle** — Dynamically switch between dark and light appearance modes with a button in the header.
 - **Real-time sync** — Changes apply across all open tabs instantly.
 - **SPA-proof** — Works through client-side navigation without requiring a page reload.
 - **Firefox + Chrome** — Supports both browsers from the same codebase.
-- **Grayscale Mode** — Apply a global high-contrast desaturation filter across both platforms to reduce visual dopamine triggers without shifting layouts.
 - **Core Engine Optimization** — Synchronous Anti-Flicker scripts ensure instant, zero-delay node filtering during Single-Page Application (SPA) transitions.
 
 ---

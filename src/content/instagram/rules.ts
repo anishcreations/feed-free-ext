@@ -40,6 +40,16 @@ const RULE_MAP: Record<InstagramRuleKey, string> = {
 export function getActiveRules(state: FeedFreeState): ActiveRule[] {
   const rules: ActiveRule[] = []
 
+  if (!state.globalEnabled) {
+    if (state.instagram.grayMode) {
+      rules.push({
+        name: 'grayMode',
+        selectors: getSelectorEntries('instagram', RULE_MAP.grayMode),
+      })
+    }
+    return rules
+  }
+
   const isHomepage = window.location.pathname === '/' || window.location.pathname === ''
 
   if (state.instagram.nukeMainFeed && isHomepage) {

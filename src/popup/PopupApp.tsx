@@ -414,6 +414,7 @@ export default function PopupApp() {
             {effectiveSite === 'youtube' && <YouTubePanel />}
             {effectiveSite === 'instagram' && <InstagramPanel />}
           </div>
+
           {showBottomFade && (
             <>
               <div
