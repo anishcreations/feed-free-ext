@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.4.1] - 2026-07-30
+
+### Fixed
+- **Search Shorts Toast Notification**: Wired `checkAndShowShortsSearchNotification` into YouTube's background heartbeat loop to reliably trigger auto-dismissing toast notifications when search page Shorts shelves are hidden.
+
+### Updated
+- **README Store Badges & Screenshots**: Updated store badges to curved flat style with active store versions (`v1.4.0` Firefox live / `v1.4.1` Chrome), added smooth rounded borders to README screenshots(new assets), and other minor updates.
+
 ## [v1.4.0] - 2026-07-30
 
 ### Added

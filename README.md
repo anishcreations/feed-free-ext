@@ -1,4 +1,4 @@
-# Feed Free — Unbiased Feed Extension (FF – UF)
+# Feed Free - Unbiased Feed Extension (FF – UF)
 
 Take control of your social media feeds. Block algorithmic recommendations, Shorts, Reels, suggested content, comments, and more on YouTube and Instagram. Works seamlessly with SPA navigation — no page reload required.
 
@@ -6,23 +6,23 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 #### Get it on:
 <p align="center">
   <a href="https://addons.mozilla.org/en-US/firefox/addon/feed-free-uf/">
-    <img src="https://img.shields.io/badge/FIREFOX%20ADD--ON-v1.2.1-FF7139?style=flat-square&logo=firefoxbrowser&logoColor=white" alt="Firefox Add-on" height="27" />
+    <img src="https://img.shields.io/badge/FIREFOX%20ADD--ON-v1.4.0-FF7139?style=flat&logo=firefoxbrowser&logoColor=white" alt="Firefox Add-on" height="27" />
   </a>
   &nbsp;&nbsp;
   <a href="https://chromewebstore.google.com/detail/feed-free-unbiased-feed-f/fmmfdjmmjmkedafmhhdmoafbioakeefp">
-    <img src="https://img.shields.io/badge/CHROME%20WEB%20STORE-v1.2.1-4285F4?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store" height="27" />
+    <img src="https://img.shields.io/badge/CHROME%20WEB%20STORE-v1.4.1-4285F4?style=flat&logo=googlechrome&logoColor=white" alt="Chrome Web Store" height="27" />
   </a>
 </p>
 
 <p align="center">
-  <img src="assets/youtube.png" alt="YouTube Feed Free" width="49%" />
-  <img src="assets/instagram.png" alt="Instagram Feed Free" width="49%" />
+  <img src="assets/youtube.png" alt="YouTube Feed Free" width="45%" style="border-radius: 4.5px; margin-right: 2px;" />
+  <img src="assets/instagram.png" alt="Instagram Feed Free" width="45%" style="border-radius: 4.5px;" />
   <br>
   <em>Updated Popup UI with YouTube (dark theme) and Instagram (light theme) controls, theme toggle & site selector.</em>
 </p>
 
 <p align="center">
-  <img src="assets/oops.png" alt="Unsupported Site" width="49%" />
+  <img src="assets/oops.png" alt="Unsupported Site" width="54%" style="border-radius: 6.7px;" />
   <br>
   <em>Oops page with default message.</em>
 </p>
@@ -46,8 +46,8 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 - **Hide Report History** — Remove Report History link from guide/sidebar.
 - **Hide Notifications** — Remove the notifications bell and activity links from the top bar and sidebar.
 - **Hide More from YouTube** — Remove the "More from YouTube" category block from the guide/sidebar.
-- **Audio Only Mode** — Black out the video player (keep audio playing) with a **draggable** floating toggle button on the player UI to switch back-and-forth directly, an optional screen visual overlay, independent execution from master switch, and keyboard shortcut (`'A'`) with floating toast notification.
-- **Grayscale Mode ('G')** — Turn YouTube completely black & white with keyboard shortcut (`'G'`) and floating toast notification.
+- **Audio Only Mode** — Black out the video player (keep audio playing) with a **draggable** floating toggle button on the player UI to switch back-and-forth directly, an optional screen visual overlay, independent execution from the master switch, and keyboard shortcut (`'A'`) with floating toast notification.
+- **Grayscale Mode ('G')** — Turn YouTube completely black & white with keyboard shortcut (`'G'`), floating toast notification, and independent execution from the master switch.
 
 ### Instagram
 - **Following Feed** — Auto-redirect to the Following timeline instead of the algorithmic Home feed.
@@ -63,7 +63,7 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 - **Hide Comments & Likes Count** — Hide comment sections, comments count, and post likes count (while keeping the interactive Like, Comment, Share, and Save button icons visible).
 - **Hide Notifications** — Remove notifications tab from sidebar, hide floating notification tooltips (Like/Comment/Follow popups), and strip unread badges.
 - **Conflict Resolution** — Choose redirect target (Profile or Saved) when both "Redirect to DMs" and "Hide DMs" are enabled simultaneously.
-- **Grayscale Mode ('G')** — Turn Instagram completely black & white with keyboard shortcut (`'G'`) and floating toast notification.
+- **Grayscale Mode ('G')** — Turn Instagram completely black & white with keyboard shortcut (`'G'`), floating toast notification, and independent execution from the master switch.
 
 ### Global
 - **Master toggle** — Enable/disable all feed blocking at once (Feed Free Active / Inactive).

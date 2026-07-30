@@ -847,6 +847,7 @@ function setupHeartbeat(): void {
       injectShadowStyles(currentState)
       if (currentState.globalEnabled) {
         hideYouTubeEndScreensJS()
+        checkAndShowShortsSearchNotification()
       } else {
         restoreYouTubeEndScreensJS()
       }
