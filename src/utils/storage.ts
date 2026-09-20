@@ -36,13 +36,24 @@ const migrations: Record<string, MigrationFn> = {
 }
 
 function applyMigrations(raw: Record<string, unknown>): FeedFreeState {
+  // Consolidate the legacy sidebar switch even for an existing development
+  // build at CURRENT_VERSION. Preserve whether the user had hidden playlists.
+  const youtube = { ...(raw.youtube as Record<string, unknown> | undefined) }
+  if ('nukeSidebar' in youtube) {
+    if (youtube.nukeSidebar && !youtube.centerPlayer) {
+      youtube.centerPlayer = true
+      youtube.keepPlaylist ??= false
+    }
+    delete youtube.nukeSidebar
+  }
+  const normalized = { ...raw, youtube }
   const currentVersion = (raw.version as string) || '0.0.0'
 
   if (currentVersion === CURRENT_VERSION) {
-    return raw as unknown as FeedFreeState
+    return normalized as unknown as FeedFreeState
   }
 
-  let migrated = { ...raw }
+  let migrated: Record<string, unknown> = { ...normalized }
   const versionKeys = Object.keys(migrations).sort()
 
   for (const version of versionKeys) {
@@ -52,6 +63,7 @@ function applyMigrations(raw: Record<string, unknown>): FeedFreeState {
 
   // Force strip lock if it still exists
   delete migrated.lock
+  migrated.version = CURRENT_VERSION
   return migrated as unknown as FeedFreeState
 }
 
@@ -71,11 +83,14 @@ export async function loadState(): Promise<FeedFreeState> {
     const merged: FeedFreeState = {
       ...defaults,
       ...migrated,
+      version: CURRENT_VERSION,
       youtube: { ...defaults.youtube, ...migrated.youtube },
       instagram: { ...defaults.instagram, ...migrated.instagram },
     }
     
-    await chrome.storage.local.set({ [STORAGE_KEY]: merged })
+    if (JSON.stringify(raw) !== JSON.stringify(merged)) {
+      await chrome.storage.local.set({ [STORAGE_KEY]: merged })
+    }
     return merged
   } catch {
     const defaults = createDefaultState()

@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.5.0] - 2026-09-20
+
+### Added
+- **Clean Player**: A centered, responsive YouTube player with a 1120px maximum width, viewport-height limit, comfortable margins, and rounded corners, including in narrow desktop windows. Removes watch-page sidebar distractions while preserving native theater, fullscreen, and miniplayer sizing.
+- **Keep Playlist Below Player**: A child option under Clean Player to keep the active playlist beneath the video or hide it for a single-player view.
+- **Blur Thumbnails**: Optional blur for video thumbnails and preview media, keeping titles, avatars, and playback clear. A slider beneath the enabled toggle adjusts and remembers strength from 1–24px (default 12px).
+- **Regression Tests**: Added automated tests for YouTube feature combinations, navigation hiding rules, settings migration, and blur-strength persistence, plus a browser fixture for responsive player layout checks.
+
+### Changed
+- Replaced **Hide Entire Sidebar** with **Clean Player**, migrating saved preferences and preserving hidden playlists. Clean Player and thumbnail blur remain off by default for new installations.
+- Updated `.gitignore` to exclude generated caches, coverage reports, and TypeScript build metadata while retaining test source files.
+
+### Fixed
+- **Home Feed Navigation Flash**: Keep the outgoing homepage feed hidden while navigating to playlists, Watch Later, search, and other pages, without hiding destination content.
+- **Settings Persistence**: Record the current settings version and avoid rewriting unchanged preferences on every polling cycle.
+
 ## [v1.4.1] - 2026-07-30
 
 ### Fixed

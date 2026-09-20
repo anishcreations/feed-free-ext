@@ -39,7 +39,9 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 - **Hide Shorts** — Remove Shorts from homepage, sidebar, and channel profile pages.
 - **Hide Search Shorts** — Remove Shorts shelves and video results completely from search pages, with a smart auto-dismissing toast at the top-center of the page notifying you when results are hidden.
 - **Hide Recommendations** — Clear suggested recommendations next to/below the player and playlist pages (leaves playlists visible).
-- **Hide Entire Sidebar** — Completely hide the sidebar, stretching the video player to full width.
+- **Clean Player** — Replace the watch sidebar with a centered player, capped at 1120px and sized to the available height, with responsive side margins and rounded corners. Works in narrow desktop windows; theater, fullscreen, and miniplayer retain native sizing.
+- **Keep Playlist Below Player** — Child option under Clean Player to keep the current playlist beneath the video. Turn it off for a single-player view. Existing Hide Entire Sidebar preferences migrate with playlists hidden.
+- **Blur Thumbnails** — Blur video thumbnails and preview media without blurring titles, avatars, or the playing video. Off by default. When enabled, a slider beneath the toggle adjusts blur strength from 1–24px and remembers your choice.
 - **Hide Comments** — Remove the entire comments section.
 - **Hide End Screens** — Remove video card overlays at the end of videos.
 - **Hide Subscriptions** — Remove Subscriptions link from guide/sidebar.

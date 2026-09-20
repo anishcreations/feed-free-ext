@@ -1,6 +1,9 @@
 import type { SelectorRule } from '../types'
+import { CENTER_PLAYER_RULES, BLUR_THUMBNAIL_RULES } from '../content/youtube/layout'
 
 export const YOUTUBE: Record<string, SelectorRule | SelectorRule[]> = {
+  centerPlayer: CENTER_PLAYER_RULES,
+  blurThumbnails: BLUR_THUMBNAIL_RULES,
   homeFeed: [
     {
       selector: 'ytd-browse[page-subtype="home"] ytd-rich-grid-renderer',
@@ -155,106 +158,12 @@ export const YOUTUBE: Record<string, SelectorRule | SelectorRule[]> = {
       value: 'none',
     },
   ],
-  sidebar: [
-    {
-      selector: 'ytd-watch-flexy #secondary',
-      fallbacks: [
-        '#secondary.ytd-watch-flexy',
-      ],
-      property: 'display',
-      value: 'none',
-    },
-    {
-      selector: 'ytd-watch-flexy #primary',
-      fallbacks: [],
-      property: 'width',
-      value: '100%',
-    },
-    {
-      selector: 'ytd-watch-flexy #primary',
-      fallbacks: [],
-      property: 'max-width',
-      value: '100%',
-    },
-    {
-      selector: 'ytd-watch-flexy #primary',
-      fallbacks: [],
-      property: 'margin',
-      value: '0 auto',
-    },
-    {
-      selector: 'ytd-watch-flexy #primary',
-      fallbacks: [],
-      property: 'padding-right',
-      value: '24px',
-    },
-    {
-      selector: 'ytd-watch-flexy #primary',
-      fallbacks: [],
-      property: 'padding-left',
-      value: '24px',
-    },
-    {
-      selector: 'ytd-watch-flexy',
-      fallbacks: [],
-      property: '--ytd-watch-flexy-sidebar-width',
-      value: '0px',
-    },
-    {
-      selector: 'ytd-watch-flexy',
-      fallbacks: [],
-      property: '--ytd-watch-flexy-sidebar-min-width',
-      value: '0px',
-    },
-    {
-      selector: 'ytd-watch-flexy:not([theater]) #player-container-outer, ytd-watch-flexy:not([theater]) #player-container, ytd-watch-flexy:not([theater]) #player-container-inner, ytd-watch-flexy:not([theater]) ytd-player, ytd-watch-flexy:not([theater]) #ytd-player',
-      fallbacks: [],
-      property: 'width',
-      value: '100%',
-    },
-    {
-      selector: 'ytd-watch-flexy:not([theater]) #player-container-outer, ytd-watch-flexy:not([theater]) #player-container, ytd-watch-flexy:not([theater]) #player-container-inner, ytd-watch-flexy:not([theater]) ytd-player, ytd-watch-flexy:not([theater]) #ytd-player',
-      fallbacks: [],
-      property: 'height',
-      value: 'auto',
-    },
-    {
-      selector: 'ytd-watch-flexy:not([theater]) #player-container-outer, ytd-watch-flexy:not([theater]) #player-container, ytd-watch-flexy:not([theater]) #player-container-inner, ytd-watch-flexy:not([theater]) ytd-player, ytd-watch-flexy:not([theater]) #ytd-player',
-      fallbacks: [],
-      property: 'aspect-ratio',
-      value: '16 / 9',
-    },
-    {
-      selector: 'ytd-watch-flexy:not([theater]) #player-container-outer, ytd-watch-flexy:not([theater]) #player-container, ytd-watch-flexy:not([theater]) #player-container-inner, ytd-watch-flexy:not([theater]) ytd-player, ytd-watch-flexy:not([theater]) #ytd-player',
-      fallbacks: [],
-      property: 'max-width',
-      value: '1280px',
-    },
-    {
-      selector: 'ytd-watch-flexy:not([theater]) #player-container-outer, ytd-watch-flexy:not([theater]) #player-container, ytd-watch-flexy:not([theater]) #player-container-inner, ytd-watch-flexy:not([theater]) ytd-player, ytd-watch-flexy:not([theater]) #ytd-player',
-      fallbacks: [],
-      property: 'padding-top',
-      value: '0',
-    },
-    {
-      selector: 'ytd-watch-flexy:not([theater]) #player-container-outer, ytd-watch-flexy:not([theater]) #player-container, ytd-watch-flexy:not([theater]) #player-container-inner, ytd-watch-flexy:not([theater]) ytd-player, ytd-watch-flexy:not([theater]) #ytd-player',
-      fallbacks: [],
-      property: 'padding-bottom',
-      value: '0',
-    },
-    {
-      selector: 'ytd-watch-flexy:not([theater]) #player-container-outer, ytd-watch-flexy:not([theater]) #player-container, ytd-watch-flexy:not([theater]) #player-container-inner, ytd-watch-flexy:not([theater]) ytd-player, ytd-watch-flexy:not([theater]) #ytd-player',
-      fallbacks: [],
-      property: 'margin',
-      value: '0 auto',
-    },
-    {
-      selector: 'ytd-watch-flexy',
-      fallbacks: [],
-      property: '--ytd-watch-flexy-max-player-width',
-      value: '1280px',
-    },
-  ],
+  hideWatchPlaylist: {
+    selector: 'ytd-watch-flexy ytd-playlist-panel-renderer',
+    fallbacks: [],
+    property: 'display',
+    value: 'none',
+  },
   endScreens: [
     {
       selector: '.ytp-ce-element, .ytp-ce-element-show, .ytp-endscreen, .html5-endscreen, .ytp-endscreen-content, .ytp-upnext, .ytp-upnext-autoplay-icon, .ytp-ce-covering-overlay, .ytp-ce-covering-image, .ytp-videowall-still, .ytp-modern-videowall-still, .ytp-suggestion-set, .ytp-fullscreen-grid-main-content, .ytp-fullscreen-grid-stills-container',

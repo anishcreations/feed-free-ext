@@ -1,42 +1,9 @@
+import { getActiveRules } from '../content/youtube/rules'
 import { loadState } from '../utils/storage'
 import { getSelectorEntries } from '../config/selectors'
-import type { FeedFreeState, SelectorRule, YouTubeState, InstagramState } from '../types'
+import type { FeedFreeState, SelectorRule, InstagramState } from '../types'
 
 const AF_STYLE_ID = 'ff-antiflicker'
-
-const YOUTUBE_TOGGLES: Record<
-  keyof Pick<
-    YouTubeState,
-    | 'nukeHomeFeed'
-    | 'nukeShorts'
-    | 'nukeSidebarRecs'
-    | 'nukeSidebar'
-    | 'nukeComments'
-    | 'nukeEndScreens'
-    | 'nukeSubscriptions'
-    | 'nukeExplore'
-    | 'nukeReportHistory'
-    | 'nukeMoreFromYouTube'
-    | 'grayMode'
-    | 'nukeShortsFromProfiles'
-    | 'nukeSearchShorts'
-  >,
-  string
-> = {
-  nukeHomeFeed: 'homeFeed',
-  nukeShorts: 'shorts',
-  nukeSidebarRecs: 'sidebarRecs',
-  nukeSidebar: 'sidebar',
-  nukeComments: 'comments',
-  nukeEndScreens: 'endScreens',
-  nukeSubscriptions: 'subscriptions',
-  nukeExplore: 'explore',
-  nukeReportHistory: 'reportHistory',
-  nukeMoreFromYouTube: 'moreFromYouTube',
-  grayMode: 'grayMode',
-  nukeShortsFromProfiles: 'shortsProfiles',
-  nukeSearchShorts: 'searchShorts',
-}
 
 const INSTAGRAM_TOGGLES: Record<
   keyof Pick<
@@ -85,7 +52,15 @@ function injectCSS(css: string): void {
 function buildAntiflickerCSS(state: FeedFreeState, platform: 'youtube' | 'instagram'): string {
   const lines: string[] = []
   const platformState = state[platform]
-  const toggleMap = platform === 'youtube' ? YOUTUBE_TOGGLES : INSTAGRAM_TOGGLES
+  // Reuse runtime rules so layout conflicts and route scoping match from first paint.
+  if (platform === 'youtube') {
+    return getActiveRules(state).flatMap(({ selectors }) => selectors.flatMap(rule =>
+      [rule.selector, ...rule.fallbacks].map(sel =>
+        `${sel} { ${rule.property}: ${rule.value} !important; }`
+      )
+    )).join('\n')
+  }
+  const toggleMap = INSTAGRAM_TOGGLES
 
   for (const [toggle, selectorKey] of Object.entries(toggleMap)) {
     if (!(platformState as unknown as Record<string, unknown>)[toggle]) continue

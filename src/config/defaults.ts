@@ -1,12 +1,16 @@
+import { DEFAULT_BLUR_LEVEL } from './thumbnailBlur'
 import type { FeedFreeState, YouTubeState, InstagramState } from '../types'
 
-export const CURRENT_VERSION = '1.4.1'
+export const CURRENT_VERSION = '1.5.0'
 
 export const DEFAULT_YOUTUBE: YouTubeState = {
   nukeHomeFeed: false,
   nukeShorts: false,
   nukeSidebarRecs: false,
-  nukeSidebar: false,
+  centerPlayer: false,
+  blurThumbnails: false,
+  thumbnailBlurLevel: DEFAULT_BLUR_LEVEL,
+  keepPlaylist: true,
   nukeComments: false,
   nukeEndScreens: false,
   nukeSubscriptions: false,

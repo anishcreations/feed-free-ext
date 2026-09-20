@@ -2,7 +2,10 @@ export interface YouTubeState {
   nukeHomeFeed: boolean
   nukeShorts: boolean
   nukeSidebarRecs: boolean
-  nukeSidebar: boolean
+  centerPlayer: boolean
+  blurThumbnails: boolean
+  thumbnailBlurLevel: number
+  keepPlaylist: boolean
   nukeComments: boolean
   nukeEndScreens: boolean
   nukeSubscriptions: boolean

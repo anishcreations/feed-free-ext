@@ -1,3 +1,4 @@
+import { normalizeBlurLevel } from '../../config/thumbnailBlur'
 import { getSelectorEntries } from '../../config/selectors'
 import type { FeedFreeState, SelectorRule } from '../../types'
 
@@ -5,7 +6,9 @@ export type YouTubeRuleKey =
   | 'homeFeed'
   | 'shorts'
   | 'sidebarRecs'
-  | 'sidebar'
+  | 'hideWatchPlaylist'
+  | 'centerPlayer'
+  | 'blurThumbnails'
   | 'comments'
   | 'musicOnly'
   | 'grayMode'
@@ -27,7 +30,9 @@ const RULE_MAP: Record<YouTubeRuleKey, string> = {
   homeFeed: 'homeFeed',
   shorts: 'shorts',
   sidebarRecs: 'sidebarRecs',
-  sidebar: 'sidebar',
+  hideWatchPlaylist: 'hideWatchPlaylist',
+  centerPlayer: 'centerPlayer',
+  blurThumbnails: 'blurThumbnails',
   comments: 'comments',
   musicOnly: 'musicOnly',
   grayMode: 'grayMode',
@@ -60,9 +65,9 @@ export function getActiveRules(state: FeedFreeState): ActiveRule[] {
     return rules
   }
 
-  const isHomepage = window.location.pathname === '/' || window.location.pathname === ''
-
-  if (state.youtube.nukeHomeFeed && isHomepage) {
+  // YouTube updates the URL before removing the previous page's DOM. Keep
+  // these home-scoped selectors active so the outgoing feed cannot flash.
+  if (state.youtube.nukeHomeFeed) {
     rules.push({
       name: 'homeFeed',
       selectors: getSelectorEntries('youtube', RULE_MAP.homeFeed),
@@ -92,11 +97,22 @@ export function getActiveRules(state: FeedFreeState): ActiveRule[] {
       selectors: getSelectorEntries('youtube', RULE_MAP.sidebarRecs),
     })
   }
-  if (state.youtube.nukeSidebar) {
+  if (state.youtube.centerPlayer && !state.youtube.keepPlaylist) {
     rules.push({
-      name: 'sidebar',
-      selectors: getSelectorEntries('youtube', RULE_MAP.sidebar),
+      name: 'hideWatchPlaylist',
+      selectors: getSelectorEntries('youtube', RULE_MAP.hideWatchPlaylist),
     })
+  }
+  for (const name of ['centerPlayer', 'blurThumbnails'] as const) {
+    if (state.youtube[name]) {
+      const selectors = getSelectorEntries('youtube', RULE_MAP[name])
+      rules.push({
+        name,
+        selectors: name === 'blurThumbnails'
+          ? selectors.map(rule => ({ ...rule, value: `blur(${normalizeBlurLevel(state.youtube.thumbnailBlurLevel)}px)` }))
+          : selectors,
+      })
+    }
   }
   if (state.youtube.nukeComments) {
     rules.push({

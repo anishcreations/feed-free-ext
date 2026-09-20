@@ -8,6 +8,11 @@ dist/
 build/
 *.zip
 
+# Generated development and test output
+.vite/
+coverage/
+*.tsbuildinfo
+
 # Debug logs
 npm-debug.log*
 yarn-debug.log*

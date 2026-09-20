@@ -1,11 +1,13 @@
 import { useStore } from '../store'
 import { Row } from './Row'
+import { MIN_BLUR_LEVEL, MAX_BLUR_LEVEL, normalizeBlurLevel } from '../../config/thumbnailBlur'
 
 export function YouTubePanel() {
   const state = useStore((s) => s.state)
   const setYouTube = useStore((s) => s.setYouTube)
   const disabled = !state.globalEnabled
   const activeColor = 'var(--youtube)'
+  const blurLevel = normalizeBlurLevel(state.youtube.thumbnailBlurLevel)
 
   return (
     <div className="flex flex-col">
@@ -50,13 +52,53 @@ export function YouTubePanel() {
         onChange={(v) => setYouTube({ nukeSidebarRecs: v })}
       />
       <Row
-        label="Hide Entire Sidebar"
-        hint="Remove sidebar completely, stretching player"
-        checked={state.youtube.nukeSidebar}
+        label="Clean Player"
+        hint="Centered, rounded player with breathing room. Removes the watch sidebar."
+        checked={state.youtube.centerPlayer}
         disabled={disabled}
         activeColor={activeColor}
-        onChange={(v) => setYouTube({ nukeSidebar: v })}
+        onChange={(v) => setYouTube({ centerPlayer: v })}
       />
+      <div style={{ paddingLeft: '16px', borderLeft: '2px solid var(--border)', marginLeft: '10px' }}>
+        <Row
+          label="Keep Playlist Below Player"
+          hint="Keep the current playlist accessible in Clean Player"
+          checked={state.youtube.keepPlaylist}
+          disabled={disabled || !state.youtube.centerPlayer}
+          activeColor={activeColor}
+          onChange={(v) => setYouTube({ keepPlaylist: v })}
+        />
+      </div>
+      <Row
+        label="Blur Thumbnails"
+        hint="Blur video previews while keeping titles and playback clear"
+        checked={state.youtube.blurThumbnails}
+        isLast={state.youtube.blurThumbnails}
+        disabled={disabled}
+        activeColor={activeColor}
+        onChange={(v) => setYouTube({ blurThumbnails: v })}
+      />
+      {state.youtube.blurThumbnails && (
+        <div className="px-[10px] pb-3" style={{ borderBottom: '1px solid var(--border)', opacity: disabled ? 0.3 : 1 }}>
+          <div className="flex items-center justify-between text-[11px] mb-1" style={{ color: 'var(--muted)' }}>
+            <label htmlFor="thumbnail-blur-level">Blur strength</label>
+            <output htmlFor="thumbnail-blur-level" className="tabular-nums">{blurLevel} px</output>
+          </div>
+          <input
+            id="thumbnail-blur-level"
+            type="range"
+            min={MIN_BLUR_LEVEL}
+            max={MAX_BLUR_LEVEL}
+            step={1}
+            value={blurLevel}
+            aria-valuetext={`${blurLevel} pixels`}
+            disabled={disabled}
+            className="w-full h-4 block cursor-pointer disabled:cursor-not-allowed"
+            style={{ accentColor: activeColor }}
+            onChange={(e) => setYouTube({ thumbnailBlurLevel: Number(e.currentTarget.value) })}
+          />
+        </div>
+      )}
       <Row
         label="Hide Comments"
         hint="Remove the comments section"

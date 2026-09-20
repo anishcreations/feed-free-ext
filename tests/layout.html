@@ -1,0 +1,59 @@
+<!doctype html><meta charset="utf-8"><title>Feed Free layout checks</title>
+<style>body{font:16px system-ui;background:#fafafa;color:#111}iframe{display:block;border:1px solid #ccc;margin:12px 0}.pass{color:green}.fail{color:red}</style>
+<h1>Feed Free responsive layout checks</h1><div id="results">Running…</div>
+<script type="module">
+import { CENTER_PLAYER_RULES, BLUR_THUMBNAIL_RULES } from '../src/content/youtube/layout.ts'
+import { getSelectorEntries } from '../src/config/selectors.ts'
+const css = [...CENTER_PLAYER_RULES, ...BLUR_THUMBNAIL_RULES].map(r => `${r.selector}{${r.property}:${r.value}!important}`).join('\n')
+const results = []
+const cases = [
+ [1440,900,'',16/9], [1920,1080,'',16/9], [1280,800,'',4/3],
+ [850,800,'full-bleed-player',16/9], [768,700,'full-bleed-player',4/3],
+ [360,640,'full-bleed-player',16/9], [850,500,'full-bleed-player',16/9],
+ [1440,900,'theater',16/9], [1440,900,'fullscreen',16/9], [1440,900,'is-mini-player',16/9],
+]
+for (const [width, height, mode, ratio] of cases) {
+ const narrow = mode === 'full-bleed-player', clean = !mode || narrow
+ const frame = document.createElement('iframe'); frame.width=width; frame.height=height
+ const ready = new Promise(resolve=>frame.onload=resolve)
+ const player = '<div id="player-container"><div id="movie_player"><div class="lesson">Euler paths<br><small>A focused space for learning</small></div><video></video><div class="controls">▶ ━━━━━━━━━━━━━━━ 3:20 / 12:00</div></div></div>'
+ const playlist = '<ytd-playlist-panel-renderer id="playlist">Your playlist <ytd-thumbnail><img alt="thumbnail"></ytd-thumbnail></ytd-playlist-panel-renderer>'
+ frame.srcdoc=`<!doctype html><style>
+ body{margin:0;font:16px system-ui;background:#0f0f0f;color:white}header{height:56px;padding-left:24px;box-sizing:border-box;border-bottom:1px solid #333;line-height:56px}ytd-watch-flexy{display:block;--ytd-watch-flexy-width-ratio:${ratio};--ytd-watch-flexy-height-ratio:1}#columns{display:flex;margin:0 24px}#primary{flex:1;padding:24px;min-width:200px}#secondary{width:320px;padding:24px}#player-container-outer{aspect-ratio:${ratio};position:relative}#player-container{position:absolute;width:100%;height:100%}#movie_player{height:100%;width:100%;position:relative;background:linear-gradient(135deg,#234544,#101c27)}.lesson{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font:36px Georgia}.lesson small{font:16px system-ui;margin-top:24px}.controls{position:absolute;bottom:0;box-sizing:border-box;padding:16px;width:100%;background:#0008;font-size:14px}#below{min-height:100px;padding-top:16px;box-sizing:border-box}#playlist{display:block;background:#242424;border-radius:12px;padding:20px;box-sizing:border-box}img{width:120px;height:68px}video{width:100%;height:100%}#related{height:500px;background:#555}
+ ${narrow ? '#full-bleed-container{display:flex;position:relative;height:600px;min-height:240px;max-height:600px}#player-full-bleed-container{position:relative;width:100%;height:600px}#columns #player,#secondary{display:none}' : ''}
+ </style><style id="ff">${css}</style><header>YouTube · Clean Player</header><ytd-watch-flexy ${mode}>
+ ${narrow ? `<div id="full-bleed-container"><div id="player-full-bleed-container">${player}</div></div>` : ''}
+ <div id="columns"><div id="primary"><div id="primary-inner"><div id="player"><div id="player-container-outer">${narrow ? '' : player}</div></div><div id="below">${narrow ? playlist : ''}<p>Graph Theory: Euler Paths and Euler Circuits</p><p>Video details and comments</p></div></div></div><div id="secondary"><div id="secondary-inner">${narrow ? '' : playlist}<div id="related">Recommendations</div></div></div></div></ytd-watch-flexy>`
+ document.body.append(frame); await ready
+ const doc=frame.contentDocument, win=frame.contentWindow
+ const rect=id=>doc.getElementById(id).getBoundingClientRect()
+ const check=(ok,label)=>results.push(`${ok?'PASS':'FAIL'} ${width}×${height} ${mode||'clean'} ${ratio.toFixed(2)}: ${label}`)
+ if(clean){
+   const player=rect('movie_player'), playlist=rect('playlist'), below=rect('below')
+   check(Math.abs(player.left+player.width/2-width/2)<2,'player centered')
+   check(player.left>=16 && player.width<=1120 && player.top>=80,'bounded player with margins')
+   check(playlist.top>=player.bottom && (narrow || below.top>=playlist.bottom),'playlist below player')
+   check(doc.documentElement.scrollWidth<=width,'no horizontal overflow')
+   check(player.height<=height-199,'player fits available height')
+   check(win.getComputedStyle(doc.getElementById('movie_player')).borderRadius==='14px','rounded corners')
+   check(win.getComputedStyle(doc.getElementById('related')).display==='none','recommendations hidden')
+ } else {
+   check(win.getComputedStyle(doc.getElementById('columns')).display==='flex','native layout preserved')
+   check(win.getComputedStyle(doc.getElementById('movie_player')).borderRadius==='0px','native corners preserved')
+ }
+ check(win.getComputedStyle(doc.querySelector('img')).filter==='blur(12px)','thumbnail blurred')
+ check(win.getComputedStyle(doc.querySelector('video')).filter==='none','watch video clear')
+ const child = doc.createElement('style')
+ child.textContent = getSelectorEntries('youtube','hideWatchPlaylist').map(r=>`${r.selector}{${r.property}:${r.value}!important}`).join('\n')
+ doc.head.append(child)
+ check(win.getComputedStyle(doc.getElementById('playlist')).display==='none','playlist child toggle hides playlist')
+ child.remove()
+ const originalCss=doc.getElementById('ff').textContent
+ doc.getElementById('ff').textContent=''
+ check(win.getComputedStyle(doc.getElementById('columns')).display==='flex' && win.getComputedStyle(doc.querySelector('img')).filter==='none','toggle off restores styles')
+ doc.getElementById('ff').textContent=originalCss
+}
+document.getElementById('results').textContent=results.join('\n')
+document.getElementById('results').style.whiteSpace='pre-wrap'
+document.getElementById('results').className=results.some(r=>r.startsWith('FAIL'))?'fail':'pass'
+</script>
