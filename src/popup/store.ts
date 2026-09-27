@@ -6,7 +6,7 @@ import { createDefaultState, DEFAULT_YOUTUBE, DEFAULT_INSTAGRAM } from '../confi
 interface StoreState {
   state: FeedFreeState
   loaded: boolean
-  init: () => Promise<void>
+  init: () => () => void
   setGlobal: (enabled: boolean) => Promise<void>
   setYouTube: (partial: Partial<YouTubeState>) => Promise<void>
   setInstagram: (partial: Partial<InstagramState>) => Promise<void>
@@ -43,13 +43,20 @@ export const useStore = create<StoreState>((set, get) => ({
   state: createDefaultState(),
   loaded: false,
 
-  init: async () => {
-    const state = await loadState()
-    set({ state, loaded: true })
-
-    onStateChanged((newState) => {
-      set({ state: newState })
+  init: () => {
+    let active = true
+    let receivedUpdate = false
+    const unsubscribe = onStateChanged((state) => {
+      receivedUpdate = true
+      if (active) set({ state, loaded: true })
     })
+    void loadState().then((state) => {
+      if (active && !receivedUpdate) set({ state, loaded: true })
+    })
+    return () => {
+      active = false
+      unsubscribe()
+    }
   },
 
   setGlobal: async (enabled) => {

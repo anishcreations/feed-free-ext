@@ -32,15 +32,9 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 > [!NOTE]
 > See [CHANGELOG.md](CHANGELOG.md) for detailed version updates and release logs.
 
+The screenshots above show the earlier popup. Store badges describe the published versions.
+
 ## Features
-
-### Popup controls (v1.6.0)
-- Use the platform icon menu for Auto detect, YouTube, or Instagram, and the adjacent theme button for light or dark appearance.
-- Feed Free ON/OFF and Reset share one row. Reset applies only to the selected platform and is disabled on unsupported sites.
-- Scroll through the full settings list; the animated arrow indicates more options below. Nested settings keep indented labels and full-width dividers.
-- When both Instagram DM options are enabled, choose Profile or Saved in the redirect dropdown. It is disabled while Feed Free is off and remembers your choice.
-
-The screenshots above show the earlier popup; the current source version is v1.6.0. Store badges describe the published versions.
 
 ### YouTube
 - **Hide Home Feed** — Remove the algorithmic video grid from youtube.com.
@@ -64,6 +58,7 @@ The screenshots above show the earlier popup; the current source version is v1.6
 - **Following Feed** — Auto-redirect to the Following timeline instead of the algorithmic Home feed.
 - **Redirect to DMs** — Go straight to `/direct/inbox/` on open instead of the feed.
 - **Hide DMs** — Remove DM navigation (header/sidebar Message buttons, floating bottom-right Messages pill, unread count badges) and redirect away from the messages inbox.
+- **Redirect Destination** — Choose Profile or Saved from the dropdown when both "Redirect to DMs" and "Hide DMs" are enabled.
 - **Hide Reels** — Remove Reels from sidebar/navigation menus (keeping profile reels visible) and auto-redirect away from `/reels/`.
 - **Hide Explore** — Remove the Explore tab and auto-redirect.
 - **Hide Professional Dashboard** — Remove Professional Dashboard link and icon from the sidebar navigation on creator/business profiles.
@@ -73,129 +68,28 @@ The screenshots above show the earlier popup; the current source version is v1.6
 - **Hide Notes** — Block status note bubbles from profiles and inbox.
 - **Hide Comments & Likes Count** — Hide comment sections, comments count, and post likes count (while keeping the interactive Like, Comment, Share, and Save button icons visible).
 - **Hide Notifications** — Remove notifications tab from sidebar, hide floating notification tooltips (Like/Comment/Follow popups), and strip unread badges.
-- **Conflict Resolution** — Choose redirect target (Profile or Saved) when both "Redirect to DMs" and "Hide DMs" are enabled simultaneously.
 - **Grayscale Mode ('G')** — Turn Instagram completely black & white with keyboard shortcut (`'G'`), floating toast notification, and independent execution from the master switch.
 
 ### Global
-- **Master toggle** — Enable/disable all feed blocking at once (Feed Free Active / Inactive).
+- **Master toggle** — Turn feed blocking on or off.
+- **Reset** — Restore defaults for the detected or manually selected platform.
 - **Independent Appearance Modes** — Audio Only Mode & Grayscale Mode run independently of master toggle so you can stay in dark/black-and-white mode anytime via shortcuts `'A'` and `'G'`.
-- **Auto Site Detection & Selector** — Smart platform detection with a manual dropdown to switch between YouTube, Instagram, or Auto mode. Shows a friendly unsupported site message with supported platform info when visiting other sites.
-- **Light/Dark Theme Toggle** — Dynamically switch between dark and light appearance modes with a button in the header.
+- **Platform Selection** — Detect the current site automatically or select YouTube or Instagram manually.
+- **Light/Dark Theme** — Switch themes using the header button.
 - **Real-time sync** — Changes apply across all open tabs instantly.
 - **SPA-proof** — Works through client-side navigation without requiring a page reload.
 - **Firefox + Chrome** — Supports both browsers from the same codebase.
-- **Core Engine Optimization** — Synchronous Anti-Flicker scripts ensure instant, zero-delay node filtering during Single-Page Application (SPA) transitions.
+- **Reduced Feed Flashes** — Early page styling helps hide blocked content while the extension starts.
 
 ---
 
 ## Installation
 
-### Chrome / Chromium
-```bash
-npm install
-npm run build:chrome
-```
-Load `dist/chrome/` as an unpacked extension at `chrome://extensions` (enable Developer mode first).
+Install using the Firefox or Chrome store badges above. To build and load the extension locally, see [Build and Load Locally](TECHNICAL.md#build-and-load-locally).
 
-### Firefox
-```bash
-npm install
-npm run build:firefox
-```
-Load `dist/firefox/manifest.json` via `about:debugging` → This Firefox → Load Temporary Add-on.
+## Technical Documentation
 
----
-
-## Development
-
-```bash
-npm run dev               # Chrome dev server with HMR (load dist/chrome/)
-npm run dev:firefox       # Firefox dev server
-npm run dev:reload        # Chrome watch build (manual reload)
-npm run build             # Build both Chrome + Firefox
-npm run typecheck         # TypeScript check
-npm test                  # Run tests
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Runtime | Chrome MV3 / Firefox MV3 |
-| Bundler | Vite 6 + CRXJS Vite Plugin |
-| UI | React 19 + Zustand 5 |
-| Styling | Tailwind CSS v4 |
-| Language | TypeScript 5 |
-
----
-
-## Project Structure
-
-```
-src/
-├── background/
-│   └── index.ts            # Service worker (storage initialization)
-├── bootstrap/
-│   └── antiflicker.ts      # document_start anti-flicker script
-├── config/
-│   ├── defaults.ts         # Default state values & version configs
-│   └── selectors.ts        # CSS element-blocking selectors
-├── content/
-│   ├── shared/
-│   │   ├── injector.ts     # Style element injector helper
-│   │   └── patron.ts       # URL polling & observer for SPA navigation
-│   ├── youtube/
-│   │   ├── index.ts        # YouTube content script main logic
-│   │   └── rules.ts        # YouTube-specific CSS selectors/rules
-│   └── instagram/
-│       ├── index.ts        # Instagram content script main logic
-│       └── rules.ts        # Instagram-specific CSS selectors/rules
-├── popup/
-│   ├── components/
-│   │   ├── InstagramPanel.tsx # Instagram toggle panel
-│   │   ├── YouTubePanel.tsx   # YouTube toggle panel
-│   │   ├── Row.tsx            # Standard setting toggle row component
-│   │   └── Toggle.tsx         # Reusable toggle switch UI component
-│   ├── PopupApp.tsx        # Main Popup React application
-│   ├── index.html          # Popup HTML entry point
-│   ├── index.tsx           # Popup React mounting logic
-│   ├── popup.css           # Styling for the Popup UI
-│   └── store.ts            # Zustand store for state sync
-├── types/
-│   └── index.ts            # TypeScript type definitions
-└── utils/
-    └── storage.ts          # chrome.storage.local wrapper & listeners
-
-manifest.json               # Chrome manifest (MV3)
-vite.config.ts              # Vite build config (dynamically builds Firefox manifest)
-```
-
----
-
-## How It Works
-
-### Semantic CSS Selectors
-Social media platforms (especially Instagram) use obfuscated, dynamically generated CSS classes that change frequently with code updates. To maintain durability and prevent breaks, Feed Free targets stable structural selectors—such as tag names, attribute selectors (e.g. `a[href^="/reels"]`), and ARIA labels (e.g. `svg[aria-label="Reels"]`)—rather than raw CSS class names.
-
-### CSS Injection
-Uses dynamic `<style>` tag element injection appended directly to the `document.documentElement`. This ensures maximum compatibility across browser platforms (Chrome and Firefox) and handles CSS updates natively in isolated MV3 worlds without requiring page reloads. 
-
-### State Management
-Three-layer sync for reliability:
-1. **Message broadcasting** — Popup sends state directly to all matching content scripts via `chrome.tabs.sendMessage`
-2. **Storage change listener** — `chrome.storage.onChanged` catches cross-tab updates instantly
-3. **Polling fallback** — Content scripts poll `chrome.storage.local` every 2 seconds via `setInterval` (catches cases where message delivery fails)
-
-### SPA Navigation Detection
-`DOMPatron` uses a `MutationObserver` mapped strictly to URL changes to instantly detect SPA navigations. We deliberately decouple the observer trigger from our CSS style injections to prevent infinite mutation loops while guaranteeing zero-delay instant filtering, even when returning to an idle tab.
-
-### Anti-Flicker
-A `document_start` content script (`bootstrap/antiflicker.ts`) loads the saved state synchronously and injects a `<style>` block to hide feed elements **before the page renders**. The main content script removes this style once it takes over with the dynamically injected style tag.
-
-### Heartbeat Recovery
-A 3-second `setInterval` in each content script periodically re-applies CSS rules. This catches edge cases where page scripts override or flush the injected stylesheet.
+See [TECHNICAL.md](TECHNICAL.md) for development commands, the full source structure, architecture, settings synchronization, testing, and version metadata.
 
 ---
 

@@ -8,22 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.6.1] - 2026-09-27
+
+### Fixed
+- Removed a global spacing reset that overrode utility spacing, including padding around the blur-strength slider.
+- Refresh scroll indicators when settings expand or collapse and after the popup finishes loading.
+- Detect supported platforms by their hostname rather than matching text anywhere in the URL.
+- Clean up the popup storage listener on unmount and ignore stale initialization results after cleanup.
+
+### Changed
+- Removed unused popup styles, animation rules, and theme variables left over from the previous layout.
+- Removed a redundant disabled-opacity utility so setting rows use one opacity rule.
+
 ## [v1.6.0] - 2026-09-27
 **Focus:** Clean, minimal aesthetics and sustainable, distraction-free UI/UX.
 
 ### Added
 - **Inline DM Conflict Dropdown**: Replaced the bulky dual-button conflict card with a clean, inline "Redirect instead to" dropdown selector (Profile / Saved) when both Instagram DM options are enabled. The dropdown smoothly inherits the global Feed Free toggle state and persists user selection.
-- **Contextual Reset Action**: The Reset control now dynamically indicates the active target ("Reset YouTube" or "Reset Instagram"), with a visual pulse feedback animation upon reset, and disables automatically on unsupported pages.
-- **Automated Popup Tests**: Added automated unit tests (`tests/popup.test.tsx`) verifying Instagram DM conflict dropdown rendering, global enable/disable states, and selection persistence.
+- **Automated Popup Tests**: Added automated unit tests (`tests/popup.test.tsx`) verifying Instagram DM conflict dropdown rendering, global enable/disable states, and rendering of the saved destination selection.
 
 ### Changed
-- **Minimalist Popup Redesign**: Overhauled the popup UI for a sleeker, lighter footprint—removing bulky borders and containers while preserving the clean branded identity ("FF — UF" wordmark, title, and theme-adaptive logo).
+- **Reset Presentation**: Updated the existing platform-specific reset control with explicit "Reset YouTube" / "Reset Instagram" labels and pulse feedback. Reset continues to affect only the detected or manually selected platform.
+- **Minimalist Popup Redesign**: Overhauled the popup UI for a sleeker, lighter footprint—removing bulky borders and containers while preserving the clean branded identity ("FF — UF" wordmark, title, and extension logo).
 - **Integrated Master Toggle**: Redesigned the master "Feed Free" toggle into a compact pill switch featuring clear internal "ON" / "OFF" status indicators and smooth sliding thumb transitions.
 - **Fixed-Column Settings Alignment**: Re-engineered setting rows with CSS Grid for rock-solid vertical switch alignment, reduced switch dimensions (30×16px), and refined typography with comfortable line height and breathing room.
 - **Nested Option Layout**: Streamlined indented child options (such as *Hide Search Shorts*, *Keep Playlist Below Player*, and *Hide Stories Everywhere*) by removing heavy vertical left border rules while keeping row dividers full-width.
 - **Animated Scroll Cue**: Replaced the single chevron with a smooth, bouncing double-chevron scroll indicator paired with top and bottom edge gradient fades.
 - **Header & Platform Controls**: Refined the theme switcher and platform picker into accessible icon buttons with keyboard focus rings (`:focus-visible`), outside-click handling, and `Escape` key dismissal.
-- **Streamlined Footer**: Replaced the mail envelope icon with a semantic "Feedback" link alongside the centered support heart icon and changelog version link in a balanced three-column layout.
+- **Streamlined Footer**: Replaced the mail envelope icon with a semantic "Feedback" link while retaining the centered support heart and changelog version link.
 - **Polished Unsupported Site Screen**: Almost similar but tiny refreshed the "Oops!" screen with cleaner spacing, divider, and branded site indicators for YouTube and Instagram.
 
 ## [v1.5.0] - 2026-09-20

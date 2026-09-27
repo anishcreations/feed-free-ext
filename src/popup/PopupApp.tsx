@@ -3,17 +3,15 @@ import { useStore } from './store'
 import { YouTubePanel } from './components/YouTubePanel'
 import { InstagramPanel } from './components/InstagramPanel'
 import { CURRENT_VERSION } from '../config/defaults'
+import { siteFromUrl, type Site } from './site'
+import { observeScrollSize } from './scroll'
 
-type Site = 'youtube' | 'instagram' | 'other'
 type SelectedSite = 'auto' | 'youtube' | 'instagram'
 
 async function detectSite(): Promise<Site> {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-    const url = tab?.url ?? ''
-    if (url.includes('youtube.com')) return 'youtube'
-    if (url.includes('instagram.com')) return 'instagram'
-    return 'other'
+    return siteFromUrl(tab?.url ?? '')
   } catch {
     return 'other'
   }
@@ -53,13 +51,14 @@ export default function PopupApp() {
     }
   }, [])
 
+  useEffect(() => init(), [init])
+
   useEffect(() => {
-    init()
     detectSite().then(setCurrentSite)
     chrome.storage.local.get('ff-theme').then((result) => {
       setTheme((result['ff-theme'] as 'dark' | 'light' | undefined) || 'dark')
     })
-  }, [init])
+  }, [])
 
   const handleScroll = useCallback(() => {
     const element = contentRef.current
@@ -73,9 +72,10 @@ export default function PopupApp() {
   const showUnsupportedMessage = selectedSite === 'auto' && currentSite === 'other'
 
   useEffect(() => {
-    const timer = setTimeout(handleScroll, 100)
-    return () => clearTimeout(timer)
-  }, [effectiveSite, globalEnabled, handleScroll])
+    const element = contentRef.current
+    if (!element) return
+    return observeScrollSize(element, handleScroll)
+  }, [loaded, effectiveSite, handleScroll])
 
   if (!loaded) {
     return (

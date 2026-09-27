@@ -26,7 +26,7 @@ export function Row({
       className={[
         'row-item',
         disabled
-          ? 'opacity-30 cursor-not-allowed disabled'
+          ? 'cursor-not-allowed disabled'
           : 'cursor-pointer',
       ].join(' ')}
     >
