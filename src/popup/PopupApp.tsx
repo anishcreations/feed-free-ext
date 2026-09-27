@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useStore } from './store'
 import { YouTubePanel } from './components/YouTubePanel'
 import { InstagramPanel } from './components/InstagramPanel'
@@ -19,42 +19,6 @@ async function detectSite(): Promise<Site> {
   }
 }
 
-function getSiteLabel(site: SelectedSite): string {
-  switch (site) {
-    case 'auto':
-      return 'Auto'
-    case 'youtube':
-      return 'YouTube'
-    case 'instagram':
-      return 'Instagram'
-  }
-}
-
-function getSiteIcon(site: SelectedSite) {
-  switch (site) {
-    case 'auto':
-      return (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-        </svg>
-      )
-    case 'youtube':
-      return (
-        <svg className="w-4 h-4" fill="var(--youtube)" viewBox="0 0 24 24">
-          <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.507 9.388.507 9.388.507s7.518 0 9.388-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-        </svg>
-      )
-    case 'instagram':
-      return (
-        <svg className="w-4 h-4" fill="none" stroke="var(--instagram)" strokeWidth="2.5" viewBox="0 0 24 24">
-          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-        </svg>
-      )
-  }
-}
-
 export default function PopupApp() {
   const init = useStore((s) => s.init)
   const loaded = useStore((s) => s.loaded)
@@ -64,47 +28,44 @@ export default function PopupApp() {
 
   const [currentSite, setCurrentSite] = useState<Site>('other')
   const [selectedSite, setSelectedSite] = useState<SelectedSite>('auto')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(true)
   const [showTopFade, setShowTopFade] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   const [isResetting, setIsResetting] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
+  const pickerRef = useRef<HTMLDetailsElement>(null)
 
   useEffect(() => {
-    init()
-    detectSite().then((site) => {
-      setCurrentSite(site)
-    })
-    chrome.storage.local.get('ff-theme').then((r) => {
-      const t = (r['ff-theme'] as 'dark' | 'light' | undefined) || 'dark'
-      setTheme(t)
-    })
-  }, [init])
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false)
+    const closePicker = (event: PointerEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) pickerRef.current?.removeAttribute('open')
+    }
+    const escapePicker = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && pickerRef.current?.open) {
+        pickerRef.current.open = false
+        pickerRef.current.querySelector('summary')?.focus()
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('pointerdown', closePicker)
+    document.addEventListener('keydown', escapePicker)
+    return () => {
+      document.removeEventListener('pointerdown', closePicker)
+      document.removeEventListener('keydown', escapePicker)
+    }
   }, [])
 
   useEffect(() => {
-    const root = document.getElementById('popup-root')
-    if (root) root.setAttribute('data-theme', theme)
-    chrome.storage.local.set({ 'ff-theme': theme })
-  }, [theme])
+    init()
+    detectSite().then(setCurrentSite)
+    chrome.storage.local.get('ff-theme').then((result) => {
+      setTheme((result['ff-theme'] as 'dark' | 'light' | undefined) || 'dark')
+    })
+  }, [init])
 
   const handleScroll = useCallback(() => {
-    const el = contentRef.current
-    if (el) {
-      setShowBottomFade(el.scrollHeight - el.scrollTop - el.clientHeight > 12)
-      setShowTopFade(el.scrollTop > 12)
-    }
+    const element = contentRef.current
+    if (!element) return
+    setShowBottomFade(element.scrollHeight - element.scrollTop - element.clientHeight > 12)
+    setShowTopFade(element.scrollTop > 12)
   }, [])
 
   const effectiveSite = selectedSite === 'auto' ? currentSite : selectedSite
@@ -112,375 +73,125 @@ export default function PopupApp() {
   const showUnsupportedMessage = selectedSite === 'auto' && currentSite === 'other'
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      handleScroll()
-    }, 100)
+    const timer = setTimeout(handleScroll, 100)
     return () => clearTimeout(timer)
   }, [effectiveSite, globalEnabled, handleScroll])
 
   if (!loaded) {
     return (
-      <div
-        className="flex items-center justify-center"
-        style={{ width: '100%', height: '480px', background: 'var(--bg)' }}
-      >
-        <div
-          className="w-6 h-6 rounded-full animate-spin border-2 border-slate-700"
-          style={{ borderTopColor: 'var(--accent)' }}
-        />
+      <div className="flex items-center justify-center" style={{ width: '100%', height: '480px', background: 'var(--bg)' }}>
+        <div className="w-6 h-6 rounded-full animate-spin border-2 border-slate-700" style={{ borderTopColor: 'var(--accent)' }} />
       </div>
     )
   }
 
+  const resetLabel = effectiveSite === 'youtube'
+    ? 'Reset YouTube'
+    : effectiveSite === 'instagram'
+      ? 'Reset Instagram'
+      : 'Reset'
+
   return (
-    <div
-      id="popup-root"
-      className="flex flex-col select-none"
-      style={{
-        width: '100%',
-        minHeight: '480px',
-        maxHeight: '540px',
-        background: 'var(--bg)',
-        backgroundImage: 'var(--bg-gradient)',
-        color: 'var(--text)',
-        padding: '16px',
-        gap: '12px',
-        boxSizing: 'border-box',
-      }}
-    >
-      {/* Header */}
-      <header
-        className="flex items-center justify-between"
-        style={{
-          paddingBottom: '12px',
-          borderBottom: '1px solid var(--header-border)',
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-[30px] h-[30px] flex items-center justify-center overflow-hidden rounded-lg" style={{ background: 'var(--surface)' }}>
-            <img src="/icons/icon128.png" alt="Logo" className="w-[125%] h-[125%] max-w-none object-cover" style={{ mixBlendMode: theme === 'light' ? 'multiply' : 'screen' }} />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[13px] font-extrabold uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--text)' }}>
-              FF - UF
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-badge" />
-            </span>
-            <span className="text-[9px] font-bold tracking-wider uppercase" style={{ color: 'var(--muted)' }}>
-              Feed Free - Unbiased Feed
-            </span>
+    <div id="popup-root" data-theme={theme} className="popup-shell select-none">
+      <header className="popup-header">
+        <div className="popup-brand">
+          <img src="/icons/icon128.png" alt="Feed Free" className="popup-logo" />
+          <div>
+            <div className="popup-wordmark">FF <span>–</span> UF</div>
+            <div className="popup-name">Feed Free – Unbiased Feed</div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-            style={{ padding: '7px', background: 'var(--btn-bg)', borderColor: 'var(--btn-border)' }}
-            className="rounded-lg transition-all duration-150 cursor-pointer border hover:brightness-110 active:scale-95 flex items-center justify-center"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ color: 'var(--muted)' }}>
+
+        <div className="popup-header-controls">
+          <button onClick={() => {
+            const nextTheme = theme === 'dark' ? 'light' : 'dark'
+            setTheme(nextTheme)
+            chrome.storage.local.set({ 'ff-theme': nextTheme })
+          }} className="theme-button" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               {theme === 'dark' ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 1 0 20.354 15.354z" />
               )}
             </svg>
           </button>
-
-          {/* Site Selector Dropdown */}
-          <div ref={dropdownRef} className="relative">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              style={{ padding: '7px 10px', background: 'var(--btn-bg)', borderColor: 'var(--btn-border)' }}
-              className="rounded-lg transition-all duration-150 cursor-pointer border hover:brightness-110 active:scale-95 flex items-center gap-1.5"
-              title={`Active Filter: ${getSiteLabel(selectedSite)}`}
-            >
-              {getSiteIcon(selectedSite)}
-              <svg
-                className={`w-2.5 h-2.5 transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                style={{ color: 'var(--muted)' }}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          <details ref={pickerRef} className="platform-picker">
+            <summary className="platform-picker-face" aria-label={`Choose platform: ${selectedSite === 'auto' ? 'Auto detect' : selectedSite}`} title="Choose platform">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: selectedSite === 'instagram' ? 'var(--instagram)' : selectedSite === 'youtube' ? 'var(--youtube)' : 'var(--muted)' }}>
+                {selectedSite === 'instagram' ? <><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></> : selectedSite === 'youtube' ? <><rect x="2" y="5" width="20" height="14" rx="4" /><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none" /></> : <path strokeLinecap="round" strokeLinejoin="round" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71m2.25 5.82a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />}
               </svg>
-            </button>
-
-            {isDropdownOpen && (
-              <div className="absolute top-full right-0 mt-2 z-50 rounded-xl border backdrop-blur-md shadow-xl animate-dropdown-in flex flex-col gap-1"
-                style={{
-                  width: '144px',
-                  padding: '8px 6px',
-                  background: 'var(--dropdown-menu-bg)',
-                  borderColor: 'var(--surface-border)',
-                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3)'
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 6 5 5 5-5" /></svg>
+            </summary>
+            <div className="platform-menu" aria-label="Platform selection">
+              {(['auto', 'youtube', 'instagram'] as const).map((site) => (
+                <button key={site} type="button" aria-pressed={selectedSite === site} onClick={() => {
+                  setSelectedSite(site)
+                  if (pickerRef.current) {
+                    pickerRef.current.open = false
+                    pickerRef.current.querySelector('summary')?.focus()
+                  }
                 }}>
-                <button
-                  onClick={() => { setSelectedSite('auto'); setIsDropdownOpen(false); }}
-                  className="w-full flex items-center gap-3 pl-4 pr-3 py-2 text-left transition-all duration-150 active:scale-[0.98] cursor-pointer rounded-lg"
-                  style={{ color: 'var(--text)', background: 'transparent' }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--row-hover)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                >
-                  <div className="flex items-center justify-center w-5 h-5 rounded-md shrink-0" style={{ background: 'var(--btn-bg)' }}>
-                    {getSiteIcon('auto')}
-                  </div>
-                  <span className="text-[11px] font-bold block flex-1">Auto Detect</span>
-                  {selectedSite === 'auto' && (
-                    <svg className="w-3.5 h-3.5 shrink-0" fill="var(--accent)" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 1000-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  )}
+                  <span>{site === 'auto' ? 'Auto detect' : site === 'youtube' ? 'YouTube' : 'Instagram'}</span>
+                  <span aria-hidden="true">{selectedSite === site ? '✓' : ''}</span>
                 </button>
-                <button
-                  onClick={() => { setSelectedSite('youtube'); setIsDropdownOpen(false); }}
-                  className="w-full flex items-center gap-3 pl-4 pr-3 py-2 text-left transition-all duration-150 active:scale-[0.98] cursor-pointer rounded-lg"
-                  style={{ color: 'var(--text)', background: 'transparent' }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--row-hover)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                >
-                  <div className="flex items-center justify-center w-5 h-5 rounded-md shrink-0" style={{ background: 'var(--btn-bg)' }}>
-                    {getSiteIcon('youtube')}
-                  </div>
-                  <span className="text-[11px] font-bold block flex-1">YouTube</span>
-                  {selectedSite === 'youtube' && (
-                    <svg className="w-3.5 h-3.5 shrink-0" fill="var(--accent)" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 1000-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </button>
-                <button
-                  onClick={() => { setSelectedSite('instagram'); setIsDropdownOpen(false); }}
-                  className="w-full flex items-center gap-3 pl-4 pr-3 py-2 text-left transition-all duration-150 active:scale-[0.98] cursor-pointer rounded-lg"
-                  style={{ color: 'var(--text)', background: 'transparent' }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--row-hover)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                >
-                  <div className="flex items-center justify-center w-5 h-5 rounded-md shrink-0" style={{ background: 'var(--btn-bg)' }}>
-                    {getSiteIcon('instagram')}
-                  </div>
-                  <span className="text-[11px] font-bold block flex-1">Instagram</span>
-                  {selectedSite === 'instagram' && (
-                    <svg className="w-3.5 h-3.5 shrink-0" fill="var(--accent)" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 1000-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          </details>
         </div>
       </header>
 
-      {/* Controls Row */}
-      <section className="flex flex-row items-center gap-2.5">
-        {/* Feed Free Global Toggle */}
-        <div style={{ flex: 1.65, minWidth: 0 }}>
-          <button
-            onClick={() => setGlobal(!globalEnabled)}
-            className="w-full rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 hover:brightness-110 active:scale-[0.98]"
-            style={{
-              height: '32px',
-              paddingLeft: '11px',
-              paddingRight: '11px',
-              background: globalEnabled
-                ? 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.03))'
-                : 'var(--surface)',
-              borderColor: globalEnabled ? 'var(--accent)' : 'var(--surface-border)',
-              boxShadow: globalEnabled ? '0 0 16px var(--accent-glow)' : 'none',
-              fontFamily: 'inherit',
-            }}
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke={globalEnabled ? 'var(--accent)' : 'var(--muted)'}>
-                {globalEnabled ? (
-                  <>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </>
-                ) : (
-                  <>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21" />
-                  </>
-                )}
-              </svg>
-              <span className="text-[12.5px] font-bold tracking-tight truncate" style={{ color: globalEnabled ? 'var(--text)' : 'var(--muted)' }}>
-                Feed Free
-              </span>
-            </div>
-
-            <div className="shrink-0 flex items-center">
-              <div
-                style={{
-                  backgroundColor: globalEnabled ? 'var(--accent)' : 'var(--border)',
-                }}
-                className="relative w-[30px] h-[16px] rounded-full transition-all duration-200"
-              >
-                <div
-                  style={{
-                    backgroundColor: '#fff',
-                  }}
-                  className={`absolute top-[3px] left-[3px] w-[10px] h-[10px] rounded-full transition-transform duration-200 shadow-[0_1px_2px_rgba(0,0,0,0.2)] ${globalEnabled ? 'translate-x-[14px]' : 'translate-x-0'}`}
-                />
-              </div>
-            </div>
+      <section className="master-row">
+        <div className="master-primary">
+          <span className="master-title">Feed Free</span>
+          <button className="master-control" onClick={() => setGlobal(!globalEnabled)} aria-label="Enable Feed Free" aria-pressed={globalEnabled}>
+            <span className={`master-switch ${globalEnabled ? 'master-switch-on' : 'master-switch-off'}`} aria-hidden="true">
+              <span className="master-switch-label">{globalEnabled ? 'ON' : 'OFF'}</span>
+              <span className="master-switch-thumb" />
+            </span>
           </button>
         </div>
-
-        {/* Reset Button */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <button
-            disabled={showUnsupportedMessage}
-            onClick={() => {
-              setIsResetting(true)
-              const resetTarget = effectiveSite === 'youtube' || effectiveSite === 'instagram' ? effectiveSite : undefined
-              resetAll(resetTarget)
-              setTimeout(() => setIsResetting(false), 600)
-            }}
-            style={{
-              height: '32px',
-              background: 'var(--btn-bg)',
-              borderColor: 'var(--btn-border)',
-              paddingLeft: '11px',
-              paddingRight: '11px',
-              opacity: showUnsupportedMessage ? 0.4 : 1,
-              cursor: showUnsupportedMessage ? 'not-allowed' : 'pointer',
-            }}
-            className={`w-full rounded-xl border transition-all duration-200 flex items-center justify-center gap-1.5 ${showUnsupportedMessage ? '' : 'hover:brightness-110 active:scale-[0.98]'}`}
-            title={
-              showUnsupportedMessage
-                ? 'Reset Disabled (Unsupported Site)'
-                : effectiveSite === 'youtube'
-                ? 'Reset YouTube Settings'
-                : effectiveSite === 'instagram'
-                ? 'Reset Instagram Settings'
-                : 'Reset All Settings'
-            }
-          >
-            <svg className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin-once' : ''}`} fill="none" stroke="var(--muted)" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            <span className="text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>Reset</span>
-          </button>
-        </div>
+        <button disabled={showUnsupportedMessage} className={`reset-control ${isResetting ? 'is-resetting' : ''}`} onClick={() => {
+          setIsResetting(true)
+          resetAll(isSupportedSite ? effectiveSite : undefined)
+          setTimeout(() => setIsResetting(false), 600)
+        }}>{resetLabel}</button>
       </section>
 
       {showUnsupportedMessage && (
-        <section className="flex-1 flex flex-col items-center justify-center gap-3 animate-fade-in px-2"
-          style={{ minHeight: '220px' }}
-        >
-          <h3 className="text-[16px] font-extrabold tracking-wide" style={{ color: 'var(--text)' }}>
-            Oops!
-          </h3>
-          <div className="h-px w-6" style={{ background: 'var(--border)' }} />
-          <p className="text-[12px] font-bold leading-relaxed" style={{ color: 'var(--muted)' }}>
-            This site isn't supported yet.
-          </p>
-          <p className="text-[10.5px] font-semibold" style={{ color: 'var(--muted)', opacity: 0.6 }}>
-            Works on
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-extrabold" style={{ color: 'var(--youtube)' }}>YouTube</span>
-            <span className="text-[11px] font-semibold" style={{ color: 'var(--muted)', opacity: 0.4 }}>/</span>
-            <span className="text-[11px] font-extrabold" style={{ color: 'var(--instagram)' }}>Instagram</span>
-          </div>
+        <section className="unsupported-panel animate-fade-in">
+          <h3>Oops!</h3>
+          <div className="unsupported-divider" />
+          <p>This site isn’t supported yet.</p>
+          <span>Works on</span>
+          <div className="supported-sites"><b>YouTube</b><i>/</i><b>Instagram</b></div>
         </section>
       )}
 
       {isSupportedSite && !showUnsupportedMessage && (
-        <main
-          className="flex-1 rounded-xl border flex flex-col overflow-hidden relative"
-          style={{
-            background: 'var(--surface)',
-            borderColor: 'var(--surface-border)',
-            padding: '3px',
-          }}
-        >
-          {showTopFade && (
-            <div
-              className="absolute top-1 left-0 right-0 h-8 pointer-events-none z-10"
-              style={{
-                background: 'linear-gradient(to bottom, var(--surface) 8%, transparent 100%)',
-              }}
-            />
-          )}
-          <div
-            ref={contentRef}
-            onScroll={handleScroll}
-            className="flex-1 overflow-y-auto"
-            style={{ padding: '3px' }}
-          >
+        <main className="settings-panel">
+          {showTopFade && <div className="settings-fade settings-fade-top" />}
+          <div ref={contentRef} onScroll={handleScroll} className="settings-scroll">
             {effectiveSite === 'youtube' && <YouTubePanel />}
             {effectiveSite === 'instagram' && <InstagramPanel />}
           </div>
-
           {showBottomFade && (
             <>
-              <div
-                className="absolute bottom-1 left-0 right-0 h-8 pointer-events-none z-10"
-                style={{
-                  background: 'linear-gradient(to top, var(--surface) 8%, transparent 100%)',
-                }}
-              />
-              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 pointer-events-none flex flex-col items-center gap-0.5 z-20">
-                <svg className="w-3.5 h-3.5 animate-scroll-arrow" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" style={{ color: 'var(--muted)' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7" />
-                </svg>
+              <div className="settings-fade settings-fade-bottom" />
+              <div className="scroll-cue" aria-hidden="true">
+                <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m7 10 5 5 5-5M7 15l5 5 5-5" /></svg>
               </div>
             </>
           )}
         </main>
       )}
 
-      {/* Footer */}
-      <footer
-        className="flex items-center justify-between text-[9px] font-semibold tracking-wide relative"
-        style={{
-          paddingTop: '12px',
-          color: 'var(--muted)',
-        }}
-      >
-        <div
-          className="absolute top-0 left-4 right-4 h-px"
-          style={{
-            background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.12), rgba(168,85,247,0.12), transparent)',
-          }}
-        />
-        <a
-          href="https://github.com/anisharyal09/feed-free-ext/blob/main/SUPPORT.md"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tooltip flex items-center active:scale-95 transition-all duration-150 opacity-60 hover:opacity-100 hover:scale-110"
-          data-tooltip="Contact / Feedback"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" style={{ color: 'var(--accent)' }}>
-            <rect width="20" height="16" x="2" y="4" rx="2" />
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-          </svg>
+      <footer className="popup-footer">
+        <a href="https://github.com/anisharyal09/feed-free-ext/blob/main/SUPPORT.md" target="_blank" rel="noopener noreferrer">Feedback</a>
+        <a className="footer-love" href="https://anisharyal09.com.np/support?from=feed-free" target="_blank" rel="noopener noreferrer" aria-label="Support me" title="Support me <3">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001z" /></svg>
         </a>
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 top-[12px] flex items-center justify-center">
-          <a
-            href="https://anisharyal09.com.np/support?from=feed-free"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tooltip flex items-center active:scale-95 transition-all duration-150 opacity-60 hover:opacity-100 hover:scale-110"
-            data-tooltip="Support me <3"
-          >
-            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--accent)' }}>
-              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-            </svg>
-          </a>
-        </div>
-        <a
-          href="https://github.com/anisharyal09/feed-free-ext/blob/main/CHANGELOG.md"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tooltip tooltip-left shrink-0 hover:underline transition-all duration-150 opacity-60 hover:opacity-100 hover:scale-105"
-          data-tooltip="View Changelog"
-        >
-          v{CURRENT_VERSION}
-        </a>
+        <a href="https://github.com/anisharyal09/feed-free-ext/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">v{CURRENT_VERSION}</a>
       </footer>
     </div>
   )

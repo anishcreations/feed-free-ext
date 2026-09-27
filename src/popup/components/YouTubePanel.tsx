@@ -33,7 +33,7 @@ export function YouTubePanel() {
           }
         }}
       />
-      <div style={{ paddingLeft: '16px', borderLeft: '2px solid var(--border)', marginLeft: '10px' }}>
+      <div className="nested-option">
         <Row
           label="Hide Search Shorts"
           hint="Remove Shorts shelves and cards from search results"
@@ -59,7 +59,7 @@ export function YouTubePanel() {
         activeColor={activeColor}
         onChange={(v) => setYouTube({ centerPlayer: v })}
       />
-      <div style={{ paddingLeft: '16px', borderLeft: '2px solid var(--border)', marginLeft: '10px' }}>
+      <div className="nested-option">
         <Row
           label="Keep Playlist Below Player"
           hint="Keep the current playlist accessible in Clean Player"
@@ -165,7 +165,7 @@ export function YouTubePanel() {
         onChange={(v) => setYouTube({ musicOnlyMode: v })}
       />
       {state.youtube.musicOnlyMode && (
-        <div style={{ paddingLeft: '16px', borderLeft: '2px solid var(--border)', marginLeft: '10px' }}>
+        <div className="nested-option">
           <Row
             label="Show Audio Only Overlay"
             hint="Display visualizer & controls on black screen"

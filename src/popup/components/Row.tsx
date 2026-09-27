@@ -24,27 +24,27 @@ export function Row({
       onClick={() => !disabled && onChange(!checked)}
       style={{ borderBottom: isLast ? 'none' : '1px solid var(--border)' }}
       className={[
-        'flex items-center justify-between py-3 px-[10px] select-none min-h-[58px] row-item',
+        'row-item',
         disabled
           ? 'opacity-30 cursor-not-allowed disabled'
           : 'cursor-pointer',
       ].join(' ')}
     >
-      <div className="flex flex-col gap-0.5 pr-4 min-w-0">
+      <div className="row-copy">
         <span
-          className="text-[13px] font-semibold tracking-tight transition-colors duration-150"
+          className="row-label"
           style={{ color: checked && !disabled ? 'var(--text)' : 'var(--label-off)' }}
         >
           {label}
         </span>
         {hint && (
-          <span className="text-[11px] font-normal leading-normal" style={{ color: 'var(--muted)' }}>
+          <span className="row-hint" style={{ color: 'var(--muted)' }}>
             {hint}
           </span>
         )}
       </div>
       <div onClick={(e) => e.stopPropagation()} className="shrink-0 flex items-center">
-        <Toggle checked={checked} disabled={disabled} onChange={onChange} activeColor={activeColor} />
+        <Toggle label={label} checked={checked} disabled={disabled} onChange={onChange} activeColor={activeColor} />
       </div>
     </div>
   )

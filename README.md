@@ -34,6 +34,14 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 
 ## Features
 
+### Popup controls (v1.6.0)
+- Use the platform icon menu for Auto detect, YouTube, or Instagram, and the adjacent theme button for light or dark appearance.
+- Feed Free ON/OFF and Reset share one row. Reset applies only to the selected platform and is disabled on unsupported sites.
+- Scroll through the full settings list; the animated arrow indicates more options below. Nested settings keep indented labels and full-width dividers.
+- When both Instagram DM options are enabled, choose Profile or Saved in the redirect dropdown. It is disabled while Feed Free is off and remembers your choice.
+
+The screenshots above show the earlier popup; the current source version is v1.6.0. Store badges describe the published versions.
+
 ### YouTube
 - **Hide Home Feed** — Remove the algorithmic video grid from youtube.com.
 - **Hide Shorts** — Remove Shorts from homepage, sidebar, and channel profile pages.
@@ -233,4 +241,3 @@ Feed Free - Unbiased Feed (FF-UF) is built with privacy in mind. It operates ent
 ## License
 
 Apache 2.0
-

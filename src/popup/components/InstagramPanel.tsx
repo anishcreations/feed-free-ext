@@ -41,40 +41,21 @@ export function InstagramPanel() {
       />
 
       {hasConflict && (
-        <div
-          className="mx-2.5 my-2.5 px-3 py-3 rounded-lg border bg-white/[0.02] flex flex-col gap-2"
-          style={{ borderColor: 'var(--border)' }}
-        >
-          <div className="text-[10px] font-bold uppercase tracking-wider text-center" style={{ color: 'var(--muted)' }}>
-            Both ON*, redirect to:
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setInstagram({ conflictRedirectTarget: 'profile' })}
-              className="flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all duration-150 cursor-pointer border"
-              style={{
-                background: target === 'profile' ? 'var(--instagram)' : 'var(--btn-bg)',
-                color: target === 'profile' ? '#fff' : 'var(--muted)',
-                borderColor: target === 'profile' ? 'transparent' : 'var(--btn-border)',
-                boxShadow: target === 'profile' ? '0 2px 8px rgba(217, 70, 239, 0.25)' : 'none'
-              }}
-            >
-              Profile
-            </button>
-            <button
-              onClick={() => setInstagram({ conflictRedirectTarget: 'saved' })}
-              className="flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all duration-150 cursor-pointer border"
-              style={{
-                background: target === 'saved' ? 'var(--instagram)' : 'var(--btn-bg)',
-                color: target === 'saved' ? '#fff' : 'var(--muted)',
-                borderColor: target === 'saved' ? 'transparent' : 'var(--btn-border)',
-                boxShadow: target === 'saved' ? '0 2px 8px rgba(217, 70, 239, 0.25)' : 'none'
-              }}
-            >
-              Saved
-            </button>
-          </div>
-        </div>
+        <label className={`conflict-redirect-row${disabled ? ' disabled' : ''}`}>
+          <span>
+            <b>Redirect instead to</b>
+            <small>Both DM options are enabled</small>
+          </span>
+          <select
+            disabled={disabled}
+            value={target}
+            onChange={(event) => setInstagram({ conflictRedirectTarget: event.currentTarget.value as 'profile' | 'saved' })}
+            aria-label="Redirect destination when both DM options are enabled"
+          >
+            <option value="profile">Profile</option>
+            <option value="saved">Saved</option>
+          </select>
+        </label>
       )}
 
       {/* Content Hiding */}
@@ -102,7 +83,7 @@ export function InstagramPanel() {
         activeColor={activeColor}
         onChange={(v) => setInstagram({ nukeStoriesHome: v })}
       />
-      <div style={{ paddingLeft: '16px', borderLeft: '2px solid var(--border)', marginLeft: '10px' }}>
+      <div className="nested-option">
         <Row
           label="Hide Stories Everywhere"
           hint="Remove stories tray, highlights, and story rings"
