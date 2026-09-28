@@ -6,7 +6,7 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 ### Get it on:
 <p align="center">
   <a href="https://addons.mozilla.org/en-US/firefox/addon/feed-free-uf/">
-    <img src="https://img.shields.io/badge/FIREFOX%20ADD--ON-v1.4.0-FF7139?style=flat&logo=firefoxbrowser&logoColor=white" alt="Firefox Add-on" height="23.67" />
+    <img src="https://img.shields.io/badge/FIREFOX%20ADD--ON-v1.6.1-FF7139?style=flat&logo=firefoxbrowser&logoColor=white" alt="Firefox Add-on" height="23.67" />
   </a>
   &nbsp;&nbsp;
   <a href="https://chromewebstore.google.com/detail/feed-free-unbiased-feed-f/fmmfdjmmjmkedafmhhdmoafbioakeefp">
@@ -19,20 +19,20 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
   &nbsp;
   <img src="assets/instagram.png" alt="Instagram Feed Free" width="36%" />
   <br>
-  <em>Updated Popup UI with YouTube (dark theme) and Instagram (light theme) controls, theme toggle & site selector.</em>
+  <em>Current popup: YouTube in dark mode and Instagram in light mode, with enabled example settings and Profile selected as the Instagram redirect destination.</em>
 </p>
 
 <p align="center">
   <img src="assets/oops.png" alt="Unsupported Site" width="36%" />
   <br>
-  <em>Oops page with default message.</em>
+  <em>On unsupported sites, the popup shows where Feed Free works. Use the platform picker to manage YouTube or Instagram settings manually.</em>
 </p>
 
 ---
 > [!NOTE]
 > See [CHANGELOG.md](CHANGELOG.md) for detailed version updates and release logs.
 
-The screenshots above show the earlier popup. Store badges describe the published versions.
+Screenshots show the current UI with example settings, not installation defaults. Store badges describe the published versions.
 
 ## Features
 

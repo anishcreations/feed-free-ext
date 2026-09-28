@@ -9,7 +9,15 @@ build/
 *.zip
 
 # Generated development and test output
+output/
 .vite/
+.cache/
+.npm/
+web-ext-artifacts/
+playwright-report/
+test-results/
+__pycache__/
+*.pyc
 coverage/
 *.tsbuildinfo
 
