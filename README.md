@@ -1,6 +1,6 @@
 # Feed Free - Unbiased Feed Extension (FF – UF)
 
-Take control of your social media feeds. Block algorithmic recommendations, Shorts, Reels, suggested content, comments, and more on YouTube and Instagram. Works seamlessly with SPA navigation — no page reload required.
+Take control of your social media feeds. Block algorithmic recommendations, Shorts, Reels, suggested content, comments, and more on YouTube and Instagram. Supports YouTube and Instagram navigation within the same page.
 
 
 ### Get it on:
@@ -19,7 +19,7 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
   &nbsp;
   <img src="assets/instagram.png" alt="Instagram Feed Free" width="36%" />
   <br>
-  <em>Current popup: YouTube in dark mode and Instagram in light mode, with enabled example settings and Profile selected as the Instagram redirect destination.</em>
+  <em>Example popup: YouTube in dark mode and Instagram in light mode, with enabled example settings and Profile selected as the Instagram redirect destination.</em>
 </p>
 
 <p align="center">
@@ -32,7 +32,7 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
 > [!NOTE]
 > See [CHANGELOG.md](CHANGELOG.md) for detailed version updates and release logs.
 
-Screenshots show the current UI with example settings, not installation defaults. Store badges describe the published versions.
+Screenshots show example settings and may not include the latest controls. Store badges describe the published versions.
 
 ## Features
 
@@ -55,18 +55,27 @@ Screenshots show the current UI with example settings, not installation defaults
 - **Grayscale Mode ('G')** — Turn YouTube completely black & white with keyboard shortcut (`'G'`), floating toast notification, and independent execution from the master switch.
 
 ### Instagram
-- **Following Feed** — Auto-redirect to the Following timeline instead of the algorithmic Home feed.
-- **Redirect to DMs** — Go straight to `/direct/inbox/` on open instead of the feed.
-- **Hide DMs** — Remove DM navigation (header/sidebar Message buttons, floating bottom-right Messages pill, unread count badges) and redirect away from the messages inbox.
-- **Redirect Destination** — Choose Profile or Saved from the dropdown when both "Redirect to DMs" and "Hide DMs" are enabled.
+
+#### Feed and messages
+
+- **Redirect Home** — Automatically redirect away from the algorithmic Home feed on open. Choose your preferred destination directly from the nested selector: **Following Feed** (chronological posts), **Direct Messages**, **Profile**, or **Saved**.
+- **Hide DMs** — Remove DM navigation (header/sidebar Message buttons, floating bottom-right Messages pill, unread count badges) and redirect away from the messages inbox. If Redirect Home was set to Direct Messages, it automatically redirects to Profile or Saved instead.
+- **Hide Floating Messages** — Hide only Instagram’s floating Messages launcher while keeping sidebar navigation and the inbox available. Hide DMs forces this nested option on; turning it off restores your previous choice.
 - **Hide Reels** — Remove Reels from sidebar/navigation menus (keeping profile reels visible) and auto-redirect away from `/reels/`.
-- **Hide Explore** — Remove the Explore button and auto-redirect. Enable the nested **Allow Search** option to keep search accessible with recommended posts and their loading indicators hidden.
-- **Hide Professional Dashboard** — Remove Professional Dashboard link and icon from the sidebar navigation on creator/business profiles.
+- **Hide Explore** — Remove the Explore button and redirect away from Explore pages.
+- **Allow Search** — A child option under Hide Explore. Keep Explore/Search available while hiding recommendations and feed loaders. Search results, hashtag pages, and location pages stay accessible. Off by default.
+
+#### Stories and post details
+
 - **Hide Stories (Home)** — Remove the top stories tray from the home feed.
 - **Hide Stories Everywhere** — Completely remove the stories tray, highlights, and story rings (plus auto-redirect from `/stories/`).
-- **Square Profile Photos** — Render profile pictures and story rings as soft squares.
 - **Hide Notes** — Block status note bubbles from profiles and inbox.
 - **Hide Comments & Likes Count** — Hide comment sections, comments count, and post likes count (while keeping the interactive Like, Comment, Share, and Save button icons visible).
+
+#### Appearance and navigation
+
+- **Square Profile Photos** — Render profile pictures and story rings as soft squares.
+- **Hide Professional Dashboard** — Remove Professional Dashboard link and icon from the sidebar navigation on creator/business profiles.
 - **Hide Notifications** — Remove notifications tab from sidebar, hide floating notification tooltips (Like/Comment/Follow popups), and strip unread badges.
 - **Grayscale Mode ('G')** — Turn Instagram completely black & white with keyboard shortcut (`'G'`), floating toast notification, and independent execution from the master switch.
 
@@ -76,8 +85,8 @@ Screenshots show the current UI with example settings, not installation defaults
 - **Independent Appearance Modes** — Audio Only Mode & Grayscale Mode run independently of master toggle so you can stay in dark/black-and-white mode anytime via shortcuts `'A'` and `'G'`.
 - **Platform Selection** — Detect the current site automatically or select YouTube or Instagram manually.
 - **Light/Dark Theme** — Switch themes using the header button.
-- **Real-time sync** — Changes apply across all open tabs instantly.
-- **SPA-proof** — Works through client-side navigation without requiring a page reload.
+- **Settings sync** — Changes are sent to open supported tabs, with periodic checks to recover missed updates.
+- **Page navigation** — Reapplies settings as the site navigates without a full page reload.
 - **Firefox + Chrome** — Supports both browsers from the same codebase.
 - **Reduced Feed Flashes** — Early page styling helps hide blocked content while the extension starts.
 
@@ -115,14 +124,17 @@ If you encounter bugs, have feature suggestions, or want to share feedback:
 
 ## Roadmap
 
-### Phase 2 — The Unified Unbiased Engine *(Core Feature)*
-The main upcoming feature is a shared data engine that feeds unmanipulated, randomly discovered, or educational content to both platforms, creating a custom Unbiased Feed!
-- **YouTube Injection**: Pull unbiased random videos/shorts into a custom or home feed.
-- **Instagram Side-Injection**: Inject insta reels randomly if possible by any means (or cross-platform random YouTube Shorts) directly into the Instagram interface, else any other platform resources (like wikipedia random content).
-- **Architecture Designed for Expansion**: The engine's data pipeline will feed into any supported platform beyond YouTube and Instagram.
+Feed controls continue to receive fixes and features throughout the roadmap. Phase numbers describe development priorities; release versions apply to the whole extension.
 
-### Phase 3 — The Lock *(Behavioral Control)*
-Add intentional friction to your social media usage for a true digital detox.
+### Phase 2 — The Lock *(Behavioral Control)*
+Add intentional friction to social media usage to help you follow the limits you choose.
+
+### Phase 3 — The Unified Unbiased Engine *(Core Feature)*
+Explore a shared engine for randomly discovered or educational content across supported platforms, creating a custom Unbiased Feed.
+
+- **YouTube Injection**: Bring randomly discovered videos or Shorts into a custom feed.
+- **Instagram Integration**: Explore random Reels or alternative sources, such as YouTube Shorts or Wikipedia, where platform access permits.
+- **Expansion**: Design the pipeline to support additional platforms.
 
 > *Note: These are just a basic theoretical outline. Features may be reimagined or changed entirely as development continues. (Open to new ideas and suggestions!)*
 

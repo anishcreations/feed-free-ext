@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   --bg: #131c2b;
   --bg-gradient: linear-gradient(135deg, #131c2b 0%, #19253a 100%);
   --surface: rgba(36, 49, 72, 0.72);
@@ -24,10 +25,14 @@
 }
 
 #popup-root {
+  color-scheme: dark;
   transition: background-color 0.3s ease, color 0.3s ease, background-image 0.3s ease;
 }
 
-[data-theme="light"] {
+[data-theme="light"],
+:root[data-theme="light"],
+#popup-root[data-theme="light"] {
+  color-scheme: light;
   --bg: #f1f5f9;
   --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   --surface: rgba(255, 255, 255, 0.85);
@@ -365,7 +370,8 @@ body {
   margin-left: 0;
 }
 
-.nested-option > .row-item { padding-left: 24px; }
+.nested-option > .row-item,
+.nested-option > .conflict-redirect-row { padding-left: 24px; }
 .conflict-redirect-row.disabled { opacity: 0.5; }
 .conflict-redirect-row select:disabled { cursor: not-allowed; }
 
@@ -396,10 +402,11 @@ body {
 }
 
 .conflict-redirect-row select {
-  width: 82px;
+  min-width: 82px;
+  width: auto;
   height: 32px;
   flex: none;
-  padding: 0 24px 0 9px;
+  padding: 0 20px 0 9px;
   border: 1px solid var(--surface-border);
   border-radius: 8px;
   background: var(--surface);
@@ -603,6 +610,60 @@ body {
   min-height: 62px;
   padding: 11px 0;
   transition: background-color 0.15s ease;
+}
+
+.row-item.row-combo {
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 10px;
+}
+
+.inline-destination-select {
+  color-scheme: dark;
+  height: 28px;
+  padding: 0 20px 0 8px;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 1 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+[data-theme="light"] .inline-destination-select {
+  color-scheme: light;
+}
+
+.inline-destination-select option {
+  background-color: #19253a;
+  color: #f8fafc;
+}
+
+[data-theme="light"] .inline-destination-select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.inline-destination-select:hover:not(:disabled) {
+  border-color: var(--instagram);
+  background-color: var(--btn-hover-bg);
+}
+
+.inline-destination-select:focus-visible {
+  outline: 2px solid var(--instagram);
+  outline-offset: 1px;
+}
+
+.inline-destination-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .row-copy { min-width: 0; }

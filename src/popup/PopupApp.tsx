@@ -56,7 +56,10 @@ export default function PopupApp() {
   useEffect(() => {
     detectSite().then(setCurrentSite)
     chrome.storage.local.get('ff-theme').then((result) => {
-      setTheme((result['ff-theme'] as 'dark' | 'light' | undefined) || 'dark')
+      const storedTheme = (result['ff-theme'] as 'dark' | 'light' | undefined) || 'dark'
+      setTheme(storedTheme)
+      document.documentElement.setAttribute('data-theme', storedTheme)
+      document.documentElement.style.colorScheme = storedTheme
     })
   }, [])
 
@@ -106,6 +109,8 @@ export default function PopupApp() {
           <button onClick={() => {
             const nextTheme = theme === 'dark' ? 'light' : 'dark'
             setTheme(nextTheme)
+            document.documentElement.setAttribute('data-theme', nextTheme)
+            document.documentElement.style.colorScheme = nextTheme
             chrome.storage.local.set({ 'ff-theme': nextTheme })
           }} className="theme-button" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

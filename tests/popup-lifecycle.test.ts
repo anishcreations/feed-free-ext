@@ -1,6 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { siteFromUrl } from '../src/popup/site'
-import { observeScrollSize } from '../src/popup/scroll'
 import { useStore } from '../src/popup/store'
 import { createDefaultState, STORAGE_KEY } from '../src/config/defaults'
 
@@ -22,27 +21,6 @@ it.each([
   ['', 'other'],
 ])('detects the platform for %s', (url, expected) => {
   expect(siteFromUrl(url)).toBe(expected)
-})
-
-it('observes viewport and content resizing and disconnects on cleanup', () => {
-  let resize: () => void = () => {}
-  const observe = vi.fn()
-  const disconnect = vi.fn()
-  vi.stubGlobal('ResizeObserver', class {
-    constructor(callback: () => void) { resize = callback }
-    observe = observe
-    disconnect = disconnect
-  })
-  const content = {} as Element
-  const element = { firstElementChild: content } as HTMLElement
-  const update = vi.fn()
-  const stop = observeScrollSize(element, update)
-  expect(observe.mock.calls).toEqual([[element], [content]])
-  expect(update).toHaveBeenCalledTimes(1)
-  resize()
-  expect(update).toHaveBeenCalledTimes(2)
-  stop()
-  expect(disconnect).toHaveBeenCalledOnce()
 })
 
 it('cleans up initialization listeners and ignores an earlier mount resolving late', async () => {

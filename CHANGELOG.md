@@ -8,6 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.8.0] - 2026-10-05
+
+### Added
+- **Updated & Unified Home Redirect Destination**: Choose your landing destination directly from a sleek inline selector (Following, DMs, Profile, or Saved) positioned directly beside the toggle switch in the Redirect Home row, merging the previous standalone Following Feed toggle into a unified control.
+- **Hide Floating Messages**: An Instagram option that hides the floating launcher while keeping sidebar navigation and the inbox accessible. Hide DMs forces the child on and disables its switch; turning the parent off restores the saved standalone preference.
+- Automated browser testing with Playwright and a dedicated Vite fixture server. `npm test` runs the Vitest unit/DOM suite followed by Chromium fixture checks; `test:unit` and `test:browser` run each suite separately.
+- Instagram redirect regression tests for localized navigation without a readable login cookie, DM redirect conflicts, late profile links, signed-out pages, external links, and insufficient navigation evidence.
+- Browser checks for floating launcher detection/restoration, launchers added after loading, home/search DOM visibility during navigation, and native ResizeObserver cleanup. The existing YouTube and Instagram HTML layout fixtures now run automatically.
+
+### Fixed
+- Detect Instagram login state using navigation routes and structure instead of English icon labels. Ignore account login pages, login prompts, and public post links when deciding whether redirects should run.
+- Fix popup dropdown select menu appearing light/white in dark mode by enforcing `color-scheme: dark` across root, popup shell, and select options.
+- Restore default settings when extension storage is cleared, preventing mounted popup controls from receiving undefined state.
+
+### Changed
+- Replace static Instagram popup markup tests with mounted React/Zustand interactions, including nested controls, disabled switches, persisted settings, broadcasts at the mocked API boundary, and storage-clear recovery.
+- Strengthen storage tests with copied values, migration checks, event filtering, unsubscribe checks, and simulated write failures. Add stylesheet-injection and MutationObserver tests, and remove misleading route stubs and implementation-only checks.
+- Separate Instagram redirect handling from the content-script entry point so tests execute the same handler used at runtime.
+- Reorganize README features and swap roadmap priorities: **Phase 2 is The Lock**; **Phase 3 is the Unified Unbiased Engine**. Update technical documentation and the privacy roadmap reference.
+
+### Validation
+- 58 unit/DOM tests and 6 Chromium browser tests passed, along with TypeScript checking and Chrome/Firefox production builds.
+- Chrome APIs and navigation boundaries are mocked; browser fixtures use synthetic markup. These checks do not establish live-site compatibility, real messaging delivery, or complete feature coverage.
+
 ## [v1.7.0] - 2026-10-04
 
 ### Added

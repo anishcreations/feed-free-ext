@@ -413,6 +413,12 @@ export const INSTAGRAM: Record<string, SelectorRule | SelectorRule[]> = {
       value: 'hidden',
     },
   ],
+  floatingDMs: {
+    selector: '[data-ff-floating-dm]',
+    fallbacks: [],
+    property: 'display',
+    value: 'none',
+  },
   dms: [
     {
       selector: 'a[href^="/direct"]',

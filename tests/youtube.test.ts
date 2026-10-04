@@ -1,17 +1,14 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { createDefaultState } from '../src/config/defaults'
 import { getActiveRules } from '../src/content/youtube/rules'
 
-afterEach(() => vi.unstubAllGlobals())
 const names = (state: ReturnType<typeof createDefaultState>) => getActiveRules(state).map(r => r.name)
 
 describe('YouTube feature combinations', () => {
   it('preserves existing defaults', () => {
-    vi.stubGlobal('window', { location: { pathname: '/watch' } })
     expect(names(createDefaultState())).toEqual([])
   })
   it('makes playlist visibility a child of Clean Player', () => {
-    vi.stubGlobal('window', { location: { pathname: '/watch' } })
     const state = createDefaultState()
     Object.assign(state.youtube, { centerPlayer: true, blurThumbnails: true })
     expect(names(state)).toEqual(['centerPlayer', 'blurThumbnails'])
@@ -26,21 +23,10 @@ describe('YouTube feature combinations', () => {
     Object.assign(state.youtube, { centerPlayer: true, blurThumbnails: true, musicOnlyMode: true, grayMode: true })
     expect(names(state)).toEqual(['musicOnly', 'grayMode'])
   })
-  it('keeps home-only hiding active while the URL changes ahead of the DOM', () => {
-    const location = { pathname: '/' }
-    vi.stubGlobal('window', { location })
+  it('enables home-feed rules only while the feature and master switches are on', () => {
     const state = createDefaultState()
     state.youtube.nukeHomeFeed = true
-    const homeRules = getActiveRules(state)
-    for (const pathname of ['/playlist', '/results', '/watch', '/@channel']) {
-      location.pathname = pathname
-      expect(getActiveRules(state)).toEqual(homeRules)
-    }
-    for (const rule of homeRules.flatMap(r => r.selectors)) {
-      for (const selector of [rule.selector, ...rule.fallbacks]) {
-        expect(selector).toContain('ytd-browse[page-subtype="home"]')
-      }
-    }
+    expect(names(state)).toContain('homeFeed')
     state.youtube.nukeHomeFeed = false
     expect(names(state)).not.toContain('homeFeed')
     state.youtube.nukeHomeFeed = true

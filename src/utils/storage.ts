@@ -111,7 +111,8 @@ export function onStateChanged(
     areaName: string,
   ) => {
     if (areaName === 'local' && changes[STORAGE_KEY]) {
-      callback(changes[STORAGE_KEY].newValue as FeedFreeState)
+      // A removed key has no newValue. Consumers must always receive usable state.
+      callback((changes[STORAGE_KEY].newValue as FeedFreeState | undefined) ?? createDefaultState())
     }
   }
   chrome.storage.onChanged.addListener(listener)

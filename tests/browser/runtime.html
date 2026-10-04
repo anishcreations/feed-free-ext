@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Content and resize fixtures</title>
+<style>
+  ytd-browse, ytd-rich-grid-renderer, ytd-search { display: block; }
+  #viewport { height: 100px; overflow: auto; }
+  #content { height: 40px; }
+</style>
+<body>
+<button id="navigate">Navigate to results</button>
+<button id="disable">Disable Home hiding</button>
+<output id="navigations">0</output>
+<ytd-browse page-subtype="home"><ytd-rich-grid-renderer id="home-grid">Home recommendations</ytd-rich-grid-renderer></ytd-browse>
+<ytd-browse page-subtype="channels"><ytd-rich-grid-renderer id="channel-grid">Channel videos</ytd-rich-grid-renderer></ytd-browse>
+<ytd-search><div id="contents">Search results</div></ytd-search>
+<button id="expand">Expand content</button>
+<button id="shrink">Shrink content</button>
+<button id="stop">Disconnect resize observer</button>
+<output id="overflow">waiting</output>
+<output id="settled">waiting</output>
+<div id="viewport"><div id="content">Popup options</div></div>
+<script type="module">
+import { createDefaultState } from '../../src/config/defaults.ts'
+import { getActiveRules } from '../../src/content/youtube/rules.ts'
+import { updateStyles } from '../../src/content/shared/injector.ts'
+import { DOMPatron } from '../../src/content/shared/patron.ts'
+import { observeScrollSize } from '../../src/popup/scroll.ts'
+const state = createDefaultState()
+state.youtube.nukeHomeFeed = true
+const apply = () => updateStyles(getActiveRules(state))
+apply()
+let navigations = 0
+const patron = new DOMPatron(() => {
+  apply()
+  document.querySelector('#navigations').textContent = String(++navigations)
+})
+patron.start()
+document.querySelector('#navigate').onclick = () => {
+  history.pushState(null, '', '/results?search_query=example')
+  document.querySelector('ytd-search').append(document.createElement('div'))
+}
+document.querySelector('#disable').onclick = () => { state.youtube.nukeHomeFeed = false; apply() }
+const viewport = document.querySelector('#viewport')
+const stop = observeScrollSize(viewport, () => {
+  document.querySelector('#overflow').textContent = String(viewport.scrollHeight > viewport.clientHeight)
+})
+const resize = async height => {
+  document.querySelector('#settled').textContent = 'waiting'
+  document.querySelector('#content').style.height = `${height}px`
+  // Let the browser run layout and deliver native ResizeObserver notifications.
+  await new Promise(requestAnimationFrame)
+  await new Promise(requestAnimationFrame)
+  document.querySelector('#settled').textContent = String(height)
+}
+document.querySelector('#expand').onclick = () => resize(300)
+document.querySelector('#shrink').onclick = () => resize(40)
+document.querySelector('#stop').onclick = stop
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Floating Messages fixture</title>
+<style>
+  body { font: 16px system-ui; }
+  nav { position: fixed; left: 0; top: 120px; }
+  .floating { position: fixed; bottom: 24px; right: 24px; padding: 20px; background: #eee; border-radius: 30px; }
+  main { margin: 160px 200px; }
+</style>
+<body>
+<button id="child">Toggle floating hiding</button>
+<button id="parent">Toggle all DMs</button>
+<button id="master">Toggle master</button>
+<button id="insert">Insert floating launcher</button>
+<button id="move">Move launcher into normal flow</button>
+<button id="rerender">Rerender launcher</button>
+<nav><a id="sidebar" href="/direct/inbox/">Messages</a></nav>
+<main><a id="profile-message" href="/direct/new/">Message profile</a><input aria-label="Message text"></main>
+<div id="launcher" class="floating"><div role="button"><svg aria-label="Messages" width="20" height="20"></svg>Messages <span>3 unread</span></div></div>
+<script type="module">
+import { createDefaultState } from '../../src/config/defaults.ts'
+import { getActiveRules } from '../../src/content/instagram/rules.ts'
+import { updateStyles } from '../../src/content/shared/injector.ts'
+import { syncFloatingDMs } from '../../src/content/instagram/floating-dms.ts'
+const state = createDefaultState()
+const apply = () => { updateStyles(getActiveRules(state)); syncFloatingDMs(state) }
+document.querySelector('#child').onclick = () => { state.instagram.hideFloatingDMs = !state.instagram.hideFloatingDMs; apply() }
+document.querySelector('#parent').onclick = () => { state.instagram.blockDMs = !state.instagram.blockDMs; apply() }
+document.querySelector('#master').onclick = () => { state.globalEnabled = !state.globalEnabled; apply() }
+document.querySelector('#insert').onclick = () => {
+  const launcher = document.createElement('div')
+  launcher.id = 'later-launcher'
+  launcher.className = 'floating'
+  launcher.innerHTML = '<a href="/direct/inbox/">Messages</a>'
+  document.body.append(launcher)
+}
+document.querySelector('#move').onclick = () => { document.querySelector('#launcher').style.position = 'static' }
+document.querySelector('#rerender').onclick = () => {
+  document.querySelector('#launcher').innerHTML = '<div role="button"><svg aria-label="Messages" width="20" height="20"></svg>Messages</div>'
+}
+apply()
+</script>
+</body>
+</html>

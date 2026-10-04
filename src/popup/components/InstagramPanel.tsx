@@ -1,5 +1,6 @@
 import { useStore } from '../store'
 import { Row } from './Row'
+import { Toggle } from './Toggle'
 
 export function InstagramPanel() {
   const state = useStore((s) => s.state)
@@ -7,30 +8,80 @@ export function InstagramPanel() {
   const disabled = !state.globalEnabled
   const activeColor = 'var(--instagram)'
 
-  const redirectOn = state.instagram.nukeMainFeed
+  const redirectOn = state.instagram.nukeMainFeed || state.instagram.forceChronological
   const blockOn = state.instagram.blockDMs
-  const hasConflict = redirectOn && blockOn
-  const target = state.instagram.conflictRedirectTarget
+  const redirectTarget = state.instagram.homeRedirectTarget || (state.instagram.forceChronological && !state.instagram.nukeMainFeed ? 'following' : blockOn ? state.instagram.conflictRedirectTarget : 'following')
 
   return (
     <div className="flex flex-col">
       {/* Feed & Navigation */}
-      <Row
-        label="Redirect Home to Following"
-        hint="Instead of Home Feed, redirects to Following feed"
-        checked={state.instagram.forceChronological}
-        disabled={disabled}
-        activeColor={activeColor}
-        onChange={(v) => setInstagram({ forceChronological: v })}
-      />
-      <Row
-        label="Redirect Home to DMs"
-        hint="Go straight to messages instead of feed"
-        checked={redirectOn}
-        disabled={disabled}
-        activeColor={activeColor}
-        onChange={(v) => setInstagram({ nukeMainFeed: v })}
-      />
+      <div
+        onClick={() =>
+          !disabled &&
+          setInstagram({
+            nukeMainFeed: !redirectOn,
+            forceChronological: !redirectOn && redirectTarget === 'following',
+          })
+        }
+        style={{ borderBottom: '1px solid var(--border)' }}
+        className={`row-item row-combo${disabled ? ' cursor-not-allowed disabled' : ' cursor-pointer'}`}
+      >
+        <div className="row-copy">
+          <span
+            className="row-label"
+            style={{ color: redirectOn && !disabled ? 'var(--text)' : 'var(--label-off)' }}
+          >
+            Redirect Home
+          </span>
+          <span className="row-hint" style={{ color: 'var(--muted)' }}>
+            {redirectOn && blockOn && redirectTarget === 'dms'
+              ? 'DMs blocked; will use Profile'
+              : 'Automatically redirect away from home feed'}
+          </span>
+        </div>
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="shrink-0 flex items-center gap-2"
+        >
+          {redirectOn && (
+            <select
+              disabled={disabled}
+              value={redirectTarget}
+              onChange={(event) => {
+                const val = event.currentTarget.value as 'following' | 'dms' | 'profile' | 'saved'
+                setInstagram({
+                  nukeMainFeed: true,
+                  homeRedirectTarget: val,
+                  forceChronological: val === 'following',
+                  conflictRedirectTarget: val === 'saved' ? 'saved' : 'profile',
+                })
+              }}
+              aria-label="Redirect destination"
+              className="inline-destination-select"
+            >
+              <option value="following">Following</option>
+              <option value="dms" disabled={blockOn}>
+                {blockOn ? 'DMs (Blocked)' : 'DMs'}
+              </option>
+              <option value="profile">Profile</option>
+              <option value="saved">Saved</option>
+            </select>
+          )}
+          <Toggle
+            label="Redirect Home"
+            checked={redirectOn}
+            disabled={disabled}
+            activeColor={activeColor}
+            onChange={(v) =>
+              setInstagram({
+                nukeMainFeed: v,
+                forceChronological: v && redirectTarget === 'following',
+              })
+            }
+          />
+        </div>
+      </div>
+
       <Row
         label="Hide DMs"
         hint="Hide DM nav and redirect away from messages"
@@ -40,23 +91,16 @@ export function InstagramPanel() {
         onChange={(v) => setInstagram({ blockDMs: v })}
       />
 
-      {hasConflict && (
-        <label className={`conflict-redirect-row${disabled ? ' disabled' : ''}`}>
-          <span>
-            <b>Redirect instead to</b>
-            <small>Both DM options are enabled</small>
-          </span>
-          <select
-            disabled={disabled}
-            value={target}
-            onChange={(event) => setInstagram({ conflictRedirectTarget: event.currentTarget.value as 'profile' | 'saved' })}
-            aria-label="Redirect destination when both DM options are enabled"
-          >
-            <option value="profile">Profile</option>
-            <option value="saved">Saved</option>
-          </select>
-        </label>
-      )}
+      <div className="nested-option">
+        <Row
+          label="Hide Floating Messages"
+          hint={blockOn ? 'Included while Hide DMs is on' : 'Hide the floating button; keep sidebar messages available'}
+          checked={blockOn || state.instagram.hideFloatingDMs}
+          disabled={disabled || blockOn}
+          activeColor={activeColor}
+          onChange={(v) => setInstagram({ hideFloatingDMs: v })}
+        />
+      </div>
 
       {/* Content Hiding */}
       <Row

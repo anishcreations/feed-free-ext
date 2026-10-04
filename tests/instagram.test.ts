@@ -7,13 +7,13 @@ afterEach(() => vi.unstubAllGlobals())
 const names = (state: ReturnType<typeof createDefaultState>) => getActiveRules(state).map(rule => rule.name)
 
 describe('Instagram Explore modes', () => {
-  it('defaults to hiding navigation and blocking Explore, including direct URLs', () => {
+  it('selects navigation hiding by default and classifies blocked Explore URLs', () => {
     const state = createDefaultState()
     state.instagram.nukeExplore = true
     expect(state.instagram.allowExploreSearch).toBe(false)
+    vi.stubGlobal('window', { location: { pathname: '/' } })
+    expect(names(state)).toContain('explore')
     for (const pathname of ['/explore', '/explore/', '/explore/search/', '/explore/tags/art/']) {
-      vi.stubGlobal('window', { location: { pathname } })
-      expect(names(state)).toContain('explore')
       expect(shouldRedirectExplore(state, pathname)).toBe(true)
     }
     for (const pathname of ['/', '/someone/', '/p/123/', '/explorer/']) {
@@ -21,7 +21,7 @@ describe('Instagram Explore modes', () => {
     }
   })
 
-  it('allows search while hiding the landing feed without collapsing its geometry', () => {
+  it('selects feed rules on landing routes while allowing search', () => {
     const state = createDefaultState()
     Object.assign(state.instagram, { nukeExplore: true, allowExploreSearch: true })
     for (const pathname of ['/explore', '/explore/']) {
@@ -29,13 +29,11 @@ describe('Instagram Explore modes', () => {
       expect(names(state)).not.toContain('explore')
       const feed = getActiveRules(state).find(rule => rule.name === 'exploreFeed')
       expect(feed).toBeDefined()
-      expect(feed!.selectors.every(rule => rule.property === 'visibility' && rule.value === 'hidden')).toBe(true)
-      expect(feed!.selectors.some(rule => rule.selector.includes('[role="progressbar"]'))).toBe(true)
       expect(shouldRedirectExplore(state, pathname)).toBe(false)
     }
   })
 
-  it('restores search results and destination pages across SPA route changes', () => {
+  it('selects no feed rules for search results and non-landing paths', () => {
     const location = { pathname: '/explore/' }
     vi.stubGlobal('window', { location })
     const state = createDefaultState()

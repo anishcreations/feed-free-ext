@@ -31,7 +31,9 @@ export interface InstagramState {
   nukeReels: boolean
   nukeExplore: boolean
   blockDMs: boolean
+  hideFloatingDMs: boolean
   conflictRedirectTarget: 'profile' | 'saved'
+  homeRedirectTarget: 'following' | 'dms' | 'profile' | 'saved'
   grayMode: boolean
   squareProfile: boolean
   nukeNotifications: boolean

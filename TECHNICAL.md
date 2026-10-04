@@ -30,8 +30,11 @@ npm run dev:firefox       # Firefox dev server (load dist/firefox/manifest.json)
 npm run dev:reload        # Chrome watch build (manual reload)
 npm run build             # Build both Chrome + Firefox
 npm run typecheck         # TypeScript check
-npm test                  # Run tests
-npm run test:watch        # Re-run tests during development
+npx playwright install chromium # One-time browser setup after npm ci
+npm test                  # Unit/DOM tests followed by Chromium fixture tests
+npm run test:unit         # Vitest only (no browser geometry checks)
+npm run test:browser      # Chromium fixture tests only
+npm run test:watch        # Re-run unit/DOM tests during development
 ```
 
 ---
@@ -70,7 +73,10 @@ src/
 │   │   └── layout.ts       # Clean Player layout rules
 │   └── instagram/
 │       ├── index.ts        # Instagram content script main logic
-│       └── rules.ts        # Instagram-specific CSS selectors/rules
+│       ├── rules.ts        # Instagram-specific CSS selectors/rules
+│       ├── explore.ts      # Explore route classification
+│       ├── redirect.ts     # Login detection and redirect handling
+│       └── floating-dms.ts # Floating Messages launcher detection
 ├── popup/
 │   ├── components/
 │   │   ├── InstagramPanel.tsx # Instagram toggle panel
@@ -89,7 +95,9 @@ src/
 └── utils/
     └── storage.ts          # chrome.storage.local wrapper & listeners
 
-tests/                      # Rule, storage, and popup regression tests
+tests/                      # Unit/DOM tests, browser fixtures, and API test adapters
+vitest.config.ts            # Unit/DOM test runner
+playwright.config.ts        # Headless browser fixture runner
 manifest.json               # Chrome manifest (MV3)
 vite.config.ts              # Vite build config (dynamically builds Firefox manifest)
 ```
@@ -136,7 +144,14 @@ Each platform content script runs a 2.5-second interval to reapply rules and mai
 
 ## Validation
 
-Run `npm run typecheck`, `npm test`, and `npm run build` before submitting code changes. Tests cover rule combinations, settings migration and persistence, popup conflict-control rendering, URL classification, resize-observer cleanup, and storage-listener lifecycle.
+The test dependencies require Node 22.22.2+ within the 22.x line, 24.15+ within 24.x, or Node 26+.
+
+Run `npm run typecheck`, `npm test`, and `npm run build` before submitting code changes. Install the Chromium test browser once with `npx playwright install chromium` (`--with-deps` on Linux CI). `npm test` fails if either suite fails; browser checks are not silently skipped.
+
+- **Unit/DOM tests (`test:unit`)**: rule selection and URL classification; settings migrations, API errors, deletion events, and listener cleanup; mounted Instagram controls using real React/Zustand subscriptions and user interactions; stylesheet injection and MutationObserver navigation; actual Instagram redirect handling with a DOM fixture and a mocked navigation boundary.
+- **Browser tests (`test:browser`)**: run `tests/layout.html` and `tests/instagram-layout.html` in headless Chromium, fail on fixture failures or page exceptions, and check actual home/search DOM visibility, floating DM launcher detection/restoration, and native ResizeObserver behavior. The dedicated Vite test server does not build or alter `dist`.
+
+The Chrome API test adapter copies stored values and emits events, but remains a mock. These tests do not verify real extension storage quotas, browser messaging delivery, or installation. Browser fixtures use synthetic markup, not live Instagram/YouTube pages; they cannot establish current site selector compatibility or actual network/infinite-scroll behavior. Coverage is focused, not exhaustive across every feature.
 
 Automated tests do not replace checking the popup in both themes or verifying behavior on live YouTube and Instagram pages. For popup changes, check manual and automatic platform selection, master on/off, platform-specific reset, nested controls, and scrolling.
 
@@ -144,4 +159,4 @@ Automated tests do not replace checking the popup in both themes or verifying be
 
 Keep `package.json`, the root package entries in `package-lock.json`, `manifest.json`, and `CURRENT_VERSION` in `src/config/defaults.ts` consistent. Do not change dependency versions when updating the extension version.
 
-Record version history in [CHANGELOG.md](CHANGELOG.md). README store badges represent published store versions and are updated manually after store approval, independently of the source version.
+Record version history in [CHANGELOG.md](CHANGELOG.md). Annotated `vX.Y.Z` Git tags mark source snapshots; generated `dist` directories remain ignored. README store badges represent published store versions and are updated manually after store approval, independently of the source version.

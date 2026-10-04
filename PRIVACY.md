@@ -16,7 +16,7 @@ Feed Free reads limited structural parameters purely to execute its local user i
 Because zero bytes of information are collected, no user data is ever uploaded to external cloud servers, databases, or third-party networks. Your parameters are stored securely inside the browser's sandboxed storage partition.
 
 ### 4. Policy Revisions
-As the product scales across milestones (such as integrating non-personalized feed alternatives in Phase 2), all configurations will continue to respect the local processing layer. Any updates to this document will be reflected directly inside this public code repository.
+As the product scales across milestones (such as integrating non-personalized feed alternatives in Phase 3), all configurations will continue to respect the local processing layer. Any updates to this document will be reflected directly inside this public code repository.
 
 ### 5. Contact
 For open-source architectural auditing or questions, please review the public codebase at: https://github.com/anisharyal09/feed-free-ext

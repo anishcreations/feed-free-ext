@@ -8,6 +8,7 @@ export type InstagramRuleKey =
   | 'explore'
   | 'exploreFeed'
   | 'dms'
+  | 'floatingDMs'
   | 'grayMode'
   | 'squareProfile'
   | 'notifications'
@@ -29,6 +30,7 @@ const RULE_MAP: Record<InstagramRuleKey, string> = {
   explore: 'explore',
   exploreFeed: 'exploreFeed',
   dms: 'dms',
+  floatingDMs: 'floatingDMs',
   grayMode: 'grayMode',
   squareProfile: 'squareProfile',
   notifications: 'notifications',
@@ -54,8 +56,10 @@ export function getActiveRules(state: FeedFreeState): ActiveRule[] {
   }
 
   const isHomepage = window.location.pathname === '/' || window.location.pathname === ''
+  const isFollowing = typeof window !== 'undefined' && !!window.location?.search?.includes('variant=following')
+  const wantsFollowing = state.instagram.homeRedirectTarget === 'following' || state.instagram.forceChronological
 
-  if (state.instagram.nukeMainFeed && isHomepage) {
+  if (state.instagram.nukeMainFeed && isHomepage && (!wantsFollowing || !isFollowing)) {
     rules.push({
       name: 'mainFeed',
       selectors: getSelectorEntries('instagram', RULE_MAP.mainFeed),
@@ -85,6 +89,12 @@ export function getActiveRules(state: FeedFreeState): ActiveRule[] {
     rules.push({
       name: 'dms',
       selectors: getSelectorEntries('instagram', RULE_MAP.dms),
+    })
+  }
+  if (state.instagram.blockDMs || state.instagram.hideFloatingDMs) {
+    rules.push({
+      name: 'floatingDMs',
+      selectors: getSelectorEntries('instagram', RULE_MAP.floatingDMs),
     })
   }
   if (state.instagram.grayMode) {
