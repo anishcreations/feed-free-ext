@@ -49,3 +49,16 @@ it('remembers blur strength while disabled and applies it after re-enabling', as
   state.youtube.blurThumbnails = true
   expect(getActiveRules(state).find(rule => rule.name === 'blurThumbnails')?.selectors[0].value).toBe('blur(18px)')
 })
+
+it('adds opt-in Explore search to older settings and persists the enabled preference', async () => {
+  let saved: any = { version: '1.6.1', globalEnabled: true, instagram: { nukeExplore: true } }
+  vi.stubGlobal('chrome', { storage: { local: {
+    get: vi.fn(async () => ({ [STORAGE_KEY]: saved })),
+    set: vi.fn(async (value) => { saved = value[STORAGE_KEY] }),
+  } } })
+  const state = await loadState()
+  expect(state.instagram).toMatchObject({ nukeExplore: true, allowExploreSearch: false })
+  state.instagram.allowExploreSearch = true
+  await saveState(state)
+  expect((await loadState()).instagram.allowExploreSearch).toBe(true)
+})

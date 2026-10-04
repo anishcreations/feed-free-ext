@@ -1,3 +1,4 @@
+import { isExploreLanding } from './explore'
 import { getSelectorEntries } from '../../config/selectors'
 import type { FeedFreeState, SelectorRule } from '../../types'
 
@@ -5,6 +6,7 @@ export type InstagramRuleKey =
   | 'mainFeed'
   | 'reels'
   | 'explore'
+  | 'exploreFeed'
   | 'dms'
   | 'grayMode'
   | 'squareProfile'
@@ -25,6 +27,7 @@ const RULE_MAP: Record<InstagramRuleKey, string> = {
   mainFeed: 'mainFeed',
   reels: 'reels',
   explore: 'explore',
+  exploreFeed: 'exploreFeed',
   dms: 'dms',
   grayMode: 'grayMode',
   squareProfile: 'squareProfile',
@@ -65,10 +68,18 @@ export function getActiveRules(state: FeedFreeState): ActiveRule[] {
     })
   }
   if (state.instagram.nukeExplore) {
-    rules.push({
-      name: 'explore',
-      selectors: getSelectorEntries('instagram', RULE_MAP.explore),
-    })
+    if (!state.instagram.allowExploreSearch) {
+      rules.push({
+        name: 'explore',
+        selectors: getSelectorEntries('instagram', RULE_MAP.explore),
+      })
+    }
+    if (isExploreLanding(window.location.pathname)) {
+      rules.push({
+        name: 'exploreFeed',
+        selectors: getSelectorEntries('instagram', RULE_MAP.exploreFeed),
+      })
+    }
   }
   if (state.instagram.blockDMs) {
     rules.push({

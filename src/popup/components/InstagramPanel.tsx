@@ -69,12 +69,24 @@ export function InstagramPanel() {
       />
       <Row
         label="Hide Explore"
-        hint="Remove Explore tab & auto-redirects"
+        hint="Hide the Explore button and block Explore pages"
         checked={state.instagram.nukeExplore}
         disabled={disabled}
         activeColor={activeColor}
         onChange={(v) => setInstagram({ nukeExplore: v })}
       />
+      {state.instagram.nukeExplore && (
+        <div className="nested-option">
+          <Row
+            label="Allow Search"
+            hint="Keep Explore/Search available without recommended posts"
+            checked={state.instagram.allowExploreSearch}
+            disabled={disabled}
+            activeColor={activeColor}
+            onChange={(v) => setInstagram({ allowExploreSearch: v })}
+          />
+        </div>
+      )}
       <Row
         label="Hide Stories (Home)"
         hint="Remove the stories tray from the home feed"

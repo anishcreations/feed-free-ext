@@ -1,7 +1,7 @@
 import { DEFAULT_BLUR_LEVEL } from './thumbnailBlur'
 import type { FeedFreeState, YouTubeState, InstagramState } from '../types'
 
-export const CURRENT_VERSION = '1.6.1'
+export const CURRENT_VERSION = '1.7.0'
 
 export const DEFAULT_YOUTUBE: YouTubeState = {
   nukeHomeFeed: false,
@@ -30,6 +30,7 @@ export const DEFAULT_YOUTUBE: YouTubeState = {
 }
 
 export const DEFAULT_INSTAGRAM: InstagramState = {
+  allowExploreSearch: false,
   forceChronological: false,
   nukeMainFeed: false,
   nukeReels: false,

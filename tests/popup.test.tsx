@@ -34,3 +34,22 @@ it.each([true, false])('DM conflict destination respects global enabled=%s witho
   expect(select?.includes('disabled=""')).toBe(!globalEnabled)
   expect(markup).toContain('<option value="saved" selected="">Saved</option>')
 })
+
+it('shows Allow Search only beneath enabled Hide Explore and preserves its disabled selection', () => {
+  const state = createDefaultState()
+  state.instagram.allowExploreSearch = true
+  useStore.setState({ state })
+  expect(renderToStaticMarkup(<InstagramPanel />)).not.toContain('Allow Search')
+  state.instagram.nukeExplore = true
+  useStore.setState({ state: { ...state } })
+  let markup = renderToStaticMarkup(<InstagramPanel />)
+  expect(markup).toContain('Allow Search')
+  const searchToggle = () => markup.match(/<button\b[^>]*aria-label="Allow Search"[^>]*>/)?.[0]
+  expect(searchToggle()).toContain('aria-checked="true"')
+  expect(searchToggle()).not.toContain('disabled=""')
+  state.globalEnabled = false
+  useStore.setState({ state: { ...state } })
+  markup = renderToStaticMarkup(<InstagramPanel />)
+  expect(searchToggle()).toContain('disabled=""')
+  expect(searchToggle()).toContain('aria-checked="true"')
+})

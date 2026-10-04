@@ -10,7 +10,7 @@ Take control of your social media feeds. Block algorithmic recommendations, Shor
   </a>
   &nbsp;&nbsp;
   <a href="https://chromewebstore.google.com/detail/feed-free-unbiased-feed-f/fmmfdjmmjmkedafmhhdmoafbioakeefp">
-    <img src="https://img.shields.io/badge/CHROME%20WEB%20STORE-v1.4.1-4285F4?style=flat&logo=googlechrome&logoColor=white" alt="Chrome Web Store" height="23.67" />
+    <img src="https://img.shields.io/badge/CHROME%20WEB%20STORE-v1.6.1-4285F4?style=flat&logo=googlechrome&logoColor=white" alt="Chrome Web Store" height="23.67" />
   </a>
 </p>
 
@@ -60,7 +60,7 @@ Screenshots show the current UI with example settings, not installation defaults
 - **Hide DMs** — Remove DM navigation (header/sidebar Message buttons, floating bottom-right Messages pill, unread count badges) and redirect away from the messages inbox.
 - **Redirect Destination** — Choose Profile or Saved from the dropdown when both "Redirect to DMs" and "Hide DMs" are enabled.
 - **Hide Reels** — Remove Reels from sidebar/navigation menus (keeping profile reels visible) and auto-redirect away from `/reels/`.
-- **Hide Explore** — Remove the Explore tab and auto-redirect.
+- **Hide Explore** — Remove the Explore button and auto-redirect. Enable the nested **Allow Search** option to keep search accessible with recommended posts and their loading indicators hidden.
 - **Hide Professional Dashboard** — Remove Professional Dashboard link and icon from the sidebar navigation on creator/business profiles.
 - **Hide Stories (Home)** — Remove the top stories tray from the home feed.
 - **Hide Stories Everywhere** — Completely remove the stories tray, highlights, and story rings (plus auto-redirect from `/stories/`).

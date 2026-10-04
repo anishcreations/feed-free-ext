@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Instagram Explore layout regression</title>
+  <style>
+    body { font: 16px system-ui; margin: 32px; background: #fafafa; color: #222; }
+    nav { padding: 16px; border-bottom: 1px solid #ccc; }
+    main { max-width: 720px; margin: 24px auto; }
+    input { padding: 12px; width: 90%; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 20px 0; }
+    .tile { display: block; height: 200px; background: #cb7; }
+    [role="progressbar"] { height: 32px; background: #ddd; }
+    #results { white-space: pre-wrap; background: #eee; padding: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Explore layout regression</h1>
+  <pre id="results">Running…</pre>
+  <nav><a id="explore-link" href="/explore/">Explore / Search</a></nav>
+  <main>
+    <input id="search" aria-label="Search" placeholder="Search">
+    <div class="grid">
+      <a class="tile" id="post" href="/p/example/">Recommended post</a>
+      <a class="tile" href="/reel/example/">Recommended reel</a>
+      <a class="tile" href="/tv/example/">Recommended video</a>
+    </div>
+    <div id="feed-loader" role="progressbar" aria-label="Loading..."></div>
+    <svg id="svg-loader" aria-label="Loading..." width="32" height="32"><circle cx="16" cy="16" r="12" /></svg>
+    <div role="search"><input aria-label="Search accounts"><div id="search-loader" role="progressbar">Search loading</div></div>
+    <div role="listbox"><a id="search-result" href="/p/result/">Search result</a></div>
+    <div role="dialog"><a id="dialog-post" href="/p/opened/">Opened post</a><div id="dialog-loader" role="progressbar">Post loading</div></div>
+  </main>
+  <script type="module">
+    import { createDefaultState } from '../src/config/defaults.ts'
+    import { getActiveRules } from '../src/content/instagram/rules.ts'
+    import { updateStyles } from '../src/content/shared/injector.ts'
+
+    const state = createDefaultState()
+    const initialPath = location.pathname
+    const checks = []
+    const el = id => document.getElementById(id)
+    const visible = id => getComputedStyle(el(id)).visibility === 'visible' && getComputedStyle(el(id)).display !== 'none'
+    const check = (name, passed) => checks.push(`${passed ? 'PASS' : 'FAIL'} ${name}`)
+    const apply = path => { history.replaceState(null, '', path); updateStyles(getActiveRules(state)) }
+    const loaderTop = el('feed-loader').getBoundingClientRect().top
+    const tileHeight = el('post').getBoundingClientRect().height
+    state.instagram.nukeExplore = true
+    state.instagram.allowExploreSearch = true
+    apply('/explore/')
+    check('Search mode keeps navigation', visible('explore-link'))
+    check('Search input stays visible', visible('search'))
+    el('search').focus()
+    check('Search input accepts focus', document.activeElement === el('search'))
+    check('Recommended tile is hidden', !visible('post'))
+    check('Hidden tile retains its height', el('post').getBoundingClientRect().height === tileHeight)
+    check('Infinite-scroll loader does not move upward', el('feed-loader').getBoundingClientRect().top === loaderTop)
+    check('Feed progress indicator is hidden', !visible('feed-loader'))
+    check('SVG loading indicator is hidden', !visible('svg-loader'))
+    check('Search progress remains visible', visible('search-loader'))
+    check('Search result remains visible', visible('search-result'))
+    check('Opened post remains visible', visible('dialog-post'))
+    check('Opened post loader remains visible', visible('dialog-loader'))
+    apply('/explore/search/')
+    check('Search route restores post content', visible('post'))
+    check('Search route restores progress indicators', visible('feed-loader'))
+    apply('/explore/')
+    check('Returning to Explore hides recommendations', !visible('post'))
+    state.instagram.allowExploreSearch = false
+    apply('/explore/')
+    check('Default blocking mode removes navigation', !visible('explore-link'))
+    state.globalEnabled = false
+    apply('/explore/')
+    check('Master off restores navigation', visible('explore-link'))
+    check('Master off restores posts', visible('post'))
+    state.globalEnabled = true
+    state.instagram.nukeExplore = false
+    state.instagram.allowExploreSearch = true
+    apply('/explore/')
+    check('Parent off restores posts despite saved child preference', visible('post'))
+    history.replaceState(null, '', initialPath)
+    el('results').textContent = checks.join('\n')
+    document.title = checks.some(line => line.startsWith('FAIL')) ? 'FAIL: Explore layout' : 'PASS: Explore layout (19 checks)'
+  </script>
+</body>
+</html>

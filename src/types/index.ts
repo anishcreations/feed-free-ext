@@ -25,6 +25,7 @@ export interface YouTubeState {
 }
 
 export interface InstagramState {
+  allowExploreSearch: boolean
   forceChronological: boolean
   nukeMainFeed: boolean
   nukeReels: boolean

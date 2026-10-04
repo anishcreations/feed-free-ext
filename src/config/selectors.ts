@@ -386,15 +386,33 @@ export const INSTAGRAM: Record<string, SelectorRule | SelectorRule[]> = {
     value: 'none',
   },
   explore: {
-    selector: 'div[role="navigation"] a[href^="/explore"]',
+    selector: 'a[href="/explore"], a[href="/explore/"], a[href^="/explore/?"], a[href^="/explore?"]',
     fallbacks: [
-      'nav a[href^="/explore"]',
-      'svg[aria-label="Explore"]',
-      'a[href^="/explore"]:not(main a)',
+      'a:has(svg[aria-label="Explore"])',
+      '[role="link"]:has(svg[aria-label="Explore"])',
+      '[role="button"]:has(svg[aria-label="Explore"])',
     ],
     property: 'display',
     value: 'none',
   },
+  exploreFeed: [
+    {
+      // Keep tile geometry: display:none collapses the grid and can continually
+      // expose Instagram's infinite-scroll sentinel, requesting more posts.
+      // Exclude native search results and post dialogs, even on /explore/.
+      selector: ':is(main, [role="main"]) :is(a[href^="/p/"], a[href^="/reel/"], a[href^="/tv/"], article, [role="feed"]):not(:is([role="dialog"], [role="listbox"], [role="search"]) *)',
+      fallbacks: [],
+      property: 'visibility',
+      value: 'hidden',
+    },
+    {
+      // Hide the recommendation loader without hiding search's own progress UI.
+      selector: ':is(main, [role="main"]) :is([role="progressbar"], svg[aria-label="Loading..."], svg[aria-label="Loading"]):not(:is([role="dialog"], [role="listbox"], [role="search"], form) *)',
+      fallbacks: [],
+      property: 'visibility',
+      value: 'hidden',
+    },
+  ],
   dms: [
     {
       selector: 'a[href^="/direct"]',

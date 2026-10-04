@@ -1,43 +1,9 @@
 import { getActiveRules } from '../content/youtube/rules'
+import { getActiveRules as getInstagramRules } from '../content/instagram/rules'
 import { loadState } from '../utils/storage'
-import { getSelectorEntries } from '../config/selectors'
-import type { FeedFreeState, SelectorRule, InstagramState } from '../types'
+import type { FeedFreeState } from '../types'
 
 const AF_STYLE_ID = 'ff-antiflicker'
-
-const INSTAGRAM_TOGGLES: Record<
-  keyof Pick<
-    InstagramState,
-    | 'nukeMainFeed'
-    | 'nukeReels'
-    | 'nukeExplore'
-    | 'blockDMs'
-    | 'grayMode'
-    | 'squareProfile'
-    | 'nukeNotifications'
-    | 'hideComments'
-    | 'nukeNotes'
-    | 'hideLikes'
-    | 'nukeStoriesHome'
-    | 'nukeStoriesEverywhere'
-    | 'nukeDashboard'
-  >,
-  string
-> = {
-  nukeMainFeed: 'mainFeed',
-  nukeReels: 'reels',
-  nukeExplore: 'explore',
-  blockDMs: 'dms',
-  grayMode: 'grayMode',
-  squareProfile: 'squareProfile',
-  nukeNotifications: 'notifications',
-  hideComments: 'comments',
-  nukeNotes: 'notes',
-  hideLikes: 'likes',
-  nukeStoriesHome: 'storiesHome',
-  nukeStoriesEverywhere: 'storiesEverywhere',
-  nukeDashboard: 'dashboard',
-}
 
 function injectCSS(css: string): void {
   const existing = document.getElementById(AF_STYLE_ID)
@@ -50,32 +16,13 @@ function injectCSS(css: string): void {
 }
 
 function buildAntiflickerCSS(state: FeedFreeState, platform: 'youtube' | 'instagram'): string {
-  const lines: string[] = []
-  const platformState = state[platform]
-  // Reuse runtime rules so layout conflicts and route scoping match from first paint.
-  if (platform === 'youtube') {
-    return getActiveRules(state).flatMap(({ selectors }) => selectors.flatMap(rule =>
-      [rule.selector, ...rule.fallbacks].map(sel =>
-        `${sel} { ${rule.property}: ${rule.value} !important; }`
-      )
-    )).join('\n')
-  }
-  const toggleMap = INSTAGRAM_TOGGLES
-
-  for (const [toggle, selectorKey] of Object.entries(toggleMap)) {
-    if (!(platformState as unknown as Record<string, unknown>)[toggle]) continue
-
-    const rules: SelectorRule[] = getSelectorEntries(platform, selectorKey)
-    for (const rule of rules) {
-      for (const sel of [rule.selector, ...rule.fallbacks]) {
-        if (sel) {
-          lines.push(`${sel} { ${rule.property}: ${rule.value} !important; }`)
-        }
-      }
-    }
-  }
-
-  return lines.join('\n')
+  // Reuse route-scoped runtime rules from first paint, including Instagram search.
+  const rules = platform === 'youtube' ? getActiveRules(state) : getInstagramRules(state)
+  return rules.flatMap(({ selectors }) => selectors.flatMap(rule =>
+    [rule.selector, ...rule.fallbacks].map(sel =>
+      `${sel} { ${rule.property}: ${rule.value} !important; }`
+    )
+  )).join('\n')
 }
 
 async function init(): Promise<void> {

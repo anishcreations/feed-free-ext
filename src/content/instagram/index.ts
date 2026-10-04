@@ -2,6 +2,7 @@ import { loadState, saveState, onStateChanged, pollState } from '../../utils/sto
 import { updateStyles, removeAntiflicker } from '../shared/injector'
 import { DOMPatron } from '../shared/patron'
 import { getActiveRules } from './rules'
+import { shouldRedirectExplore } from './explore'
 import type { FeedFreeState } from '../../types'
 
 const log = console.log.bind(console, '[FeedFree:Instagram]')
@@ -103,7 +104,7 @@ function handleRedirect(state: FeedFreeState): boolean {
       return true
     }
 
-    if (state.instagram.nukeExplore && path.startsWith('/explore')) {
+    if (shouldRedirectExplore(state, path)) {
       const username = getUsernameFromProfileUrl(getProfileUrl())
       location.replace(username ? `/${username}/` : '/')
       return true

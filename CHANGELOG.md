@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.7.0] - 2026-10-04
+
+### Added
+- **Allow Search**: An optional child setting under Instagram's **Hide Explore**. Enable it to keep the combined Explore/Search entry available while hiding recommended posts. Search results, hashtag pages, and location pages remain accessible. Off by default; Hide Explore alone removes the navigation entry and redirects away from Explore pages.
+- Regression tests for Explore modes, route changes, settings persistence, and popup controls, plus a browser fixture checking feed geometry and search visibility.
+
+### Fixed
+- Keep hidden Explore tiles in the layout so hiding them does not pull the infinite-scroll loader upward. Hide recommendation loading indicators while preserving search and post-dialog loading UI.
+- Apply route-scoped Instagram rules from first paint so Explore hiding preserves search controls.
+
+### Changed
+- Updated the README Chrome Web Store badge to `v1.6.1` and documented the new Instagram search option.
+
 ## [v1.6.1] - 2026-09-27
 
 ### Fixed
