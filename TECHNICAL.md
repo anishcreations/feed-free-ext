@@ -18,6 +18,8 @@ npm run build:firefox
 ```
 Load `dist/firefox/manifest.json` via `about:debugging` → This Firefox → Load Temporary Add-on.
 
+After rebuilding, reload the installed extension and refresh open supported tabs so they use the updated content scripts.
+
 ---
 
 The build writes browser-specific output to `dist/chrome` or `dist/firefox`. Chrome uses a background service worker; the Firefox build replaces it with a background script entry. Both manifests use MV3.
@@ -28,7 +30,7 @@ The build writes browser-specific output to `dist/chrome` or `dist/firefox`. Chr
 npm run dev               # Chrome dev server with HMR (load dist/chrome/)
 npm run dev:firefox       # Firefox dev server (load dist/firefox/manifest.json)
 npm run dev:reload        # Chrome watch build (manual reload)
-npm run build             # Build both Chrome + Firefox
+npm run build            # Build both Chrome + Firefox
 npm run typecheck         # TypeScript check
 npx playwright install chromium # One-time browser setup after npm ci
 npm test                  # Unit/DOM tests followed by Chromium fixture tests
@@ -76,7 +78,8 @@ src/
 │       ├── rules.ts        # Instagram-specific CSS selectors/rules
 │       ├── explore.ts      # Explore route classification
 │       ├── redirect.ts     # Login detection and redirect handling
-│       └── floating-dms.ts # Floating Messages launcher detection
+│       ├── floating-dms.ts # Floating Messages launcher detection
+│       └── nav-items.ts    # Dashboard/notification control detection and restoration
 ├── popup/
 │   ├── components/
 │   │   ├── InstagramPanel.tsx # Instagram toggle panel
@@ -111,6 +114,12 @@ vite.config.ts              # Vite build config (dynamically builds Firefox mani
 Platform rules live in `src/config/selectors.ts` and the platform-specific `rules.ts` files. They use structural selectors, attributes, ARIA labels, and some platform class names, with fallbacks where provided. YouTube and Instagram layout changes can require selector updates.
 
 The shared injector applies rules through a `<style>` element on `document.documentElement`. Content scripts also handle redirects and behavior that requires JavaScript, such as player controls and some comment-hiding rules.
+
+Instagram’s `nav-items.ts` detects dashboard and notification controls through app routes and exact normalized labels. Fragment-only links such as Afrikaans’s `Professionele beheerpaneel` use label matching. Unlabelled heart icons require a recognized navigation container or a nearby group of app links, so post like buttons remain available. Dashboard route classification is also used by redirects.
+
+Hide Notes retains the existing profile bubble rules and adds an inbox carousel rule only on `/direct` routes. It targets the surrounding row through the supplied virtualized-list structure, avatar controls, and note-bubble wrapper, hiding music tiles and carousel arrows together. CSS handles inserted rows automatically; disabling the feature or master switch, or leaving DMs, removes the extra rule. This selector still depends on Instagram’s markup and note-bubble classes.
+
+One observer batches relevant DOM changes into an animation-frame scan using current settings. The module marks individual controls and tracks their inline display values and priorities. Disabling a feature, reclassifying a control, or removing it from the DOM restores its display style. The observer ignores the module’s own marker/style attributes to avoid triggering itself.
 
 ### State Management
 
@@ -148,8 +157,8 @@ The test dependencies require Node 22.22.2+ within the 22.x line, 24.15+ within 
 
 Run `npm run typecheck`, `npm test`, and `npm run build` before submitting code changes. Install the Chromium test browser once with `npx playwright install chromium` (`--with-deps` on Linux CI). `npm test` fails if either suite fails; browser checks are not silently skipped.
 
-- **Unit/DOM tests (`test:unit`)**: rule selection and URL classification; settings migrations, API errors, deletion events, and listener cleanup; mounted Instagram controls using real React/Zustand subscriptions and user interactions; stylesheet injection and MutationObserver navigation; actual Instagram redirect handling with a DOM fixture and a mocked navigation boundary.
-- **Browser tests (`test:browser`)**: run `tests/layout.html` and `tests/instagram-layout.html` in headless Chromium, fail on fixture failures or page exceptions, and check actual home/search DOM visibility, floating DM launcher detection/restoration, and native ResizeObserver behavior. The dedicated Vite test server does not build or alter `dist`.
+- **Unit/DOM tests (`test:unit`)**: rule and route selection, settings/storage behavior, mounted Instagram popup interactions, stylesheet injection, DOM observers, and redirect handling with mocked navigation. Navigation-control tests cover translations, fragment links, sibling preservation, dynamic updates, and display restoration. Notes checks cover DM route boundaries, whole-row hiding/restoration, and preservation of unrelated lists.
+- **Browser tests (`test:browser`)**: execute the YouTube/Instagram layout fixtures in headless Chromium and check rendered home/search visibility, floating Messages controls, dashboard/notification hiding and restoration, DM Notes row removal including music and arrows, and native ResizeObserver behavior. Notes checks also verify that chats move up, messaging remains usable, and inserted rows hide automatically. The dedicated Vite server does not build or alter `dist`.
 
 The Chrome API test adapter copies stored values and emits events, but remains a mock. These tests do not verify real extension storage quotas, browser messaging delivery, or installation. Browser fixtures use synthetic markup, not live Instagram/YouTube pages; they cannot establish current site selector compatibility or actual network/infinite-scroll behavior. Coverage is focused, not exhaustive across every feature.
 

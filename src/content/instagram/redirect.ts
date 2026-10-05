@@ -1,4 +1,5 @@
 import { shouldRedirectExplore } from './explore'
+import { isDashboardPath } from './nav-items'
 import type { FeedFreeState } from '../../types'
 
 const log = console.log.bind(console, '[FeedFree:Instagram]')
@@ -32,7 +33,7 @@ function navigationPath(link: HTMLAnchorElement): string | null {
 }
 
 function isLoggedIn(): boolean {
-  if (/^\/accounts(?:\/|$)/.test(location.pathname)) return false
+  if (/^\/accounts\/(?:login|emailsignup|onetap)(?:\/|$)/.test(location.pathname)) return false
   if (/(?:^|;\s*)ds_user_id=[^;]+/.test(document.cookie)) return true
 
   // CSS can hide navigation without removing it. Use its structure and routes,
@@ -98,7 +99,15 @@ export function handleRedirect(state: FeedFreeState): boolean {
       return true
     }
 
-    if (state.instagram.nukeNotifications && path.startsWith('/notifications')) {
+    if (state.instagram.nukeNotifications && (
+      path.startsWith('/notifications') || path.startsWith('/accounts/activity') || path.startsWith('/activity')
+    )) {
+      const username = getUsernameFromProfileUrl(getProfileUrl())
+      location.replace(username ? `/${username}/` : '/')
+      return true
+    }
+
+    if (state.instagram.nukeDashboard && isDashboardPath(path)) {
       const username = getUsernameFromProfileUrl(getProfileUrl())
       location.replace(username ? `/${username}/` : '/')
       return true

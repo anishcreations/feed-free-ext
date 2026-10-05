@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.8.1] - 2026-10-05
+
+### Fixed
+- Hide Instagram dashboard and notification controls using app routes and supported translated labels. Recognize Afrikaans `Professionele beheerpaneel` links targeting `#`, nested controls, and profile banners with subtitles.
+- Preserve profile containers, neighboring actions, external links, and post/dialog like buttons when hiding navigation controls.
+- Restore original inline display values and priorities, including controls detached by rerenders or changed by Instagram while hidden.
+- Recheck dynamic text, routes, and accessible labels using the latest settings. Keep redirects active on `/accounts/activity/` and recognized dashboard/insights routes.
+- Hide the entire DM Notes carousel, including music tiles, avatars, and its arrow, instead of leaving the row visible after hiding note bubbles. Scope the extra rule to DM routes and restore the original layout when disabled.
+
+### Changed
+- Consolidate navigation hiding and restoration, remove unused exports and broad CSS fallbacks, and organize regression fixtures without adding runtime dependencies.
+- Extend DOM and Chromium checks for translated controls, dynamic updates, setting changes, and restoration.
+
+### Validation
+- 93 unit/DOM tests, 10 Chromium fixture tests, TypeScript checking, and Chrome/Firefox production builds passed.
+- The Notes selector matches exactly the outer row in the supplied DOM excerpt. Regression fixtures use a reduced version with synthetic names and images; live Notes behavior remains unverified.
+- A separate packaged-Chrome smoke check exercised startup and real extension-storage updates on a synthetic page. Live Firefox inspection observed Afrikaans dashboard hiding after an add-on reload and restoration after refreshing with hiding disabled. Other live language/layout combinations remain unverified.
+
 ## [v1.8.0] - 2026-10-05
 
 ### Added
@@ -18,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Browser checks for floating launcher detection/restoration, launchers added after loading, home/search DOM visibility during navigation, and native ResizeObserver cleanup. The existing YouTube and Instagram HTML layout fixtures now run automatically.
 
 ### Fixed
-- Detect Instagram login state using navigation routes and structure instead of English icon labels. Ignore account login pages, login prompts, and public post links when deciding whether redirects should run.
+- **Language-independent Instagram navigation detection**: Replace English SVG icon-label checks with app routes and navigation structure when detecting the logged-in state. Redirects can work with translated interfaces even without a readable login cookie. Exclude account login pages, login prompts, and public post links from this fallback.
 - Fix popup dropdown select menu appearing light/white in dark mode by enforcing `color-scheme: dark` across root, popup shell, and select options.
 - Restore default settings when extension storage is cleared, preventing mounted popup controls from receiving undefined state.
 

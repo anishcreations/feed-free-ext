@@ -159,7 +159,7 @@ export function InstagramPanel() {
       {/* UI Tweaks */}
       <Row
         label="Hide Notes"
-        hint="Block status note bubbles from profiles and inbox"
+        hint="Hide profile note bubbles and the inbox Notes row, including music"
         checked={state.instagram.nukeNotes}
         disabled={disabled}
         activeColor={activeColor}

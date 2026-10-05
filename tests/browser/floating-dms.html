@@ -1,13 +1,15 @@
 <!doctype html>
 <html lang="en">
+<head>
 <meta charset="utf-8">
-<title>Floating Messages fixture</title>
+<title>Instagram Messages and Navigation fixture</title>
 <style>
   body { font: 16px system-ui; }
   nav { position: fixed; left: 0; top: 120px; }
   .floating { position: fixed; bottom: 24px; right: 24px; padding: 20px; background: #eee; border-radius: 30px; }
   main { margin: 160px 200px; }
 </style>
+</head>
 <body>
 <button id="child">Toggle floating hiding</button>
 <button id="parent">Toggle all DMs</button>
@@ -15,19 +17,55 @@
 <button id="insert">Insert floating launcher</button>
 <button id="move">Move launcher into normal flow</button>
 <button id="rerender">Rerender launcher</button>
-<nav><a id="sidebar" href="/direct/inbox/">Messages</a></nav>
-<main><a id="profile-message" href="/direct/new/">Message profile</a><input aria-label="Message text"></main>
+<button id="notify-mode">Hide notifications only</button>
+<button id="dashboard-mode">Hide dashboard only</button>
+<button id="all-nav-mode">Hide dashboard and notifications</button>
+<button id="nav-reset">Restore navigation</button>
+<button id="nav-insert">Insert translated navigation items</button>
+<header id="profile-header">
+  <button id="professional-dashboard" style="display:inline-flex"><span>व्यावसायिक ड्यासबोर्ड</span><span>100 accounts reached</span></button>
+  <a id="edit-profile" href="/accounts/edit/">Edit profile</a>
+</header>
+<nav><button id="nav-notifications" aria-label="Notificaciones"><svg></svg></button><a id="sidebar" href="/direct/inbox/">Messages</a></nav>
+<div id="plain-rail">
+  <a id="plain-home" href="/">Home</a><a href="/reels/">Reels</a>
+  <a id="afrikaans-dashboard" href="#"><span>Professionele beheerpaneel</span></a>
+  <a id="nested-notifications" href="#"><div role="button"><svg aria-label="Notificaciones"></svg><span>3</span></div></a>
+  <div id="unlabelled-notifications" tabindex="0"><svg><path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122Z"></path></svg></div>
+</div>
+<main>
+<section id="plain-profile">
+  <header id="plain-profile-header"><a id="plain-edit" href="/accounts/edit/">Edit profile</a></header>
+  <div id="plain-dashboard" style="display:flex!important"><div>Professional dashboard</div><p>100 accounts reached</p></div>
+  <div id="plain-actions"><a href="/professional_dashboard/">Dashboard</a><a id="plain-saved" href="/alice/saved/">Saved</a></div>
+</section>
+<a id="profile-message" href="/direct/new/">Message profile</a><input aria-label="Message text">
+</main>
 <div id="launcher" class="floating"><div role="button"><svg aria-label="Messages" width="20" height="20"></svg>Messages <span>3 unread</span></div></div>
 <script type="module">
 import { createDefaultState } from '../../src/config/defaults.ts'
 import { getActiveRules } from '../../src/content/instagram/rules.ts'
 import { updateStyles } from '../../src/content/shared/injector.ts'
+import { syncInstagramNavItems } from '../../src/content/instagram/nav-items.ts'
 import { syncFloatingDMs } from '../../src/content/instagram/floating-dms.ts'
-const state = createDefaultState()
-const apply = () => { updateStyles(getActiveRules(state)); syncFloatingDMs(state) }
-document.querySelector('#child').onclick = () => { state.instagram.hideFloatingDMs = !state.instagram.hideFloatingDMs; apply() }
-document.querySelector('#parent').onclick = () => { state.instagram.blockDMs = !state.instagram.blockDMs; apply() }
-document.querySelector('#master').onclick = () => { state.globalEnabled = !state.globalEnabled; apply() }
+let state = createDefaultState()
+const apply = () => {
+  updateStyles(getActiveRules(state))
+  syncFloatingDMs(state)
+  syncInstagramNavItems(state)
+}
+document.querySelector('#child').onclick = () => {
+  state.instagram.hideFloatingDMs = !state.instagram.hideFloatingDMs
+  apply()
+}
+document.querySelector('#parent').onclick = () => {
+  state.instagram.blockDMs = !state.instagram.blockDMs
+  apply()
+}
+document.querySelector('#master').onclick = () => {
+  state.globalEnabled = !state.globalEnabled
+  apply()
+}
 document.querySelector('#insert').onclick = () => {
   const launcher = document.createElement('div')
   launcher.id = 'later-launcher'
@@ -35,9 +73,26 @@ document.querySelector('#insert').onclick = () => {
   launcher.innerHTML = '<a href="/direct/inbox/">Messages</a>'
   document.body.append(launcher)
 }
-document.querySelector('#move').onclick = () => { document.querySelector('#launcher').style.position = 'static' }
+document.querySelector('#move').onclick = () => {
+  document.querySelector('#launcher').style.position = 'static'
+}
 document.querySelector('#rerender').onclick = () => {
   document.querySelector('#launcher').innerHTML = '<div role="button"><svg aria-label="Messages" width="20" height="20"></svg>Messages</div>'
+}
+const navMode = (dashboard, notifications) => {
+  state = {
+    ...state,
+    instagram: { ...state.instagram, nukeDashboard: dashboard, nukeNotifications: notifications },
+  }
+  apply()
+}
+document.querySelector('#notify-mode').onclick = () => navMode(false, true)
+document.querySelector('#dashboard-mode').onclick = () => navMode(true, false)
+document.querySelector('#all-nav-mode').onclick = () => navMode(true, true)
+document.querySelector('#nav-reset').onclick = () => navMode(false, false)
+document.querySelector('#nav-insert').onclick = () => {
+  document.querySelector('#profile-header').insertAdjacentHTML('beforeend', '<button id="late-dashboard"><span>Tableau de bord professionnel</span><span>Stats</span></button>')
+  document.querySelector('nav').insertAdjacentHTML('beforeend', '<button id="late-notifications">Notificaciones</button>')
 }
 apply()
 </script>

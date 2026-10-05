@@ -140,6 +140,8 @@ it.each([
   ['blockDMs', '/direct/inbox/', '/alice/'],
   ['nukeReels', '/reels/', '/alice/'],
   ['nukeNotifications', '/notifications/', '/alice/'],
+  ['nukeNotifications', '/accounts/activity/', '/alice/'],
+  ['nukeDashboard', '/alice/dashboard/', '/alice/'],
   ['nukeStoriesEverywhere', '/stories/alice/', '/alice/'],
   ['nukeMainFeed', '/', '/direct/inbox/'],
 ] as const)('localized navigation permits %s to enforce its redirect', (feature, path, destination) => {

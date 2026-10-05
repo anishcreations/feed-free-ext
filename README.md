@@ -69,14 +69,14 @@ Screenshots show example settings and may not include the latest controls. Store
 
 - **Hide Stories (Home)** — Remove the top stories tray from the home feed.
 - **Hide Stories Everywhere** — Completely remove the stories tray, highlights, and story rings (plus auto-redirect from `/stories/`).
-- **Hide Notes** — Block status note bubbles from profiles and inbox.
+- **Hide Notes** — Hide profile note bubbles and the entire inbox Notes row, including music notes, avatars, and carousel arrows.
 - **Hide Comments & Likes Count** — Hide comment sections, comments count, and post likes count (while keeping the interactive Like, Comment, Share, and Save button icons visible).
 
 #### Appearance and navigation
 
 - **Square Profile Photos** — Render profile pictures and story rings as soft squares.
-- **Hide Professional Dashboard** — Remove Professional Dashboard link and icon from the sidebar navigation on creator/business profiles.
-- **Hide Notifications** — Remove notifications tab from sidebar, hide floating notification tooltips (Like/Comment/Follow popups), and strip unread badges.
+- **Hide Professional Dashboard** — Hide dashboard links and profile banners using known routes and supported translations, including Afrikaans’s “Professionele beheerpaneel.”
+- **Hide Notifications** — Hide notification controls in the sidebar/top bar and floating notification summary tooltips. Keep post like controls visible.
 - **Grayscale Mode ('G')** — Turn Instagram completely black & white with keyboard shortcut (`'G'`), floating toast notification, and independent execution from the master switch.
 
 ### Global
@@ -104,11 +104,7 @@ See [TECHNICAL.md](TECHNICAL.md) for development commands, the full source struc
 
 ## Troubleshooting
 
-> [!IMPORTANT]
-> **Extension Not Working?**  
-> For any issue with the extension not working or functioning correctly:
->
->**Force reload** the webpage (YouTube/Instagram). If it still doesn't work after this, kindly report the issue.
+After updating a local build, reload the extension and refresh open YouTube/Instagram tabs. If a control stays visible, report the site, interface language, and exact label. Instagram controls without recognizable routes depend on supported label translations.
 
 ---
 

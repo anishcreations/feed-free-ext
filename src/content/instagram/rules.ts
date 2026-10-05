@@ -14,6 +14,7 @@ export type InstagramRuleKey =
   | 'notifications'
   | 'comments'
   | 'notes'
+  | 'notesInbox'
   | 'likes'
   | 'storiesHome'
   | 'storiesEverywhere'
@@ -36,6 +37,7 @@ const RULE_MAP: Record<InstagramRuleKey, string> = {
   notifications: 'notifications',
   comments: 'comments',
   notes: 'notes',
+  notesInbox: 'notesInbox',
   likes: 'likes',
   storiesHome: 'storiesHome',
   storiesEverywhere: 'storiesEverywhere',
@@ -126,6 +128,12 @@ export function getActiveRules(state: FeedFreeState): ActiveRule[] {
       name: 'notes',
       selectors: getSelectorEntries('instagram', RULE_MAP.notes),
     })
+    if (/^\/direct(?:\/|$)/.test(window.location.pathname)) {
+      rules.push({
+        name: 'notesInbox',
+        selectors: getSelectorEntries('instagram', RULE_MAP.notesInbox),
+      })
+    }
   }
   if (state.instagram.hideLikes) {
     rules.push({

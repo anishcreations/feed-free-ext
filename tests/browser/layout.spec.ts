@@ -1,5 +1,37 @@
 import { expect, test } from '@playwright/test'
 
+test('Hide Notes removes the whole DM carousel, including music, and restores its layout', async ({ page }) => {
+  await page.goto('/tests/browser/notes.html')
+  const row = page.locator('#notes-row')
+  const chats = page.locator('#chats')
+  await expect(row).toBeVisible()
+  const initialTop = await chats.evaluate(el => el.getBoundingClientRect().top)
+  await page.locator('#toggle').click()
+  await expect(row).toBeHidden()
+  await expect(row.locator('img')).toHaveCount(2)
+  await expect(row.getByText('Example song')).toBeHidden()
+  await expect(row.getByRole('button', { name: 'Next', includeHidden: true })).toBeHidden()
+  await expect(chats).toBeVisible()
+  expect(await chats.evaluate(el => el.getBoundingClientRect().top)).toBe(initialTop - 160)
+  await page.getByRole('textbox', { name: 'Message' }).fill('Chat stays usable')
+  await expect(page.getByRole('textbox', { name: 'Message' })).toHaveValue('Chat stays usable')
+  await page.locator('#insert').click()
+  await expect(row).toBeHidden()
+  await page.locator('#toggle').click()
+  await expect(row).toBeVisible()
+  expect(await row.evaluate(el => getComputedStyle(el).display)).toBe('flex')
+  expect(await chats.evaluate(el => el.getBoundingClientRect().top)).toBe(initialTop)
+  await page.locator('#toggle').click()
+  await expect(row).toBeHidden()
+  await page.locator('#master').click()
+  await expect(row).toBeVisible()
+  await page.locator('#master').click()
+  await expect(row).toBeHidden()
+  await page.locator('#navigate').click()
+  await expect(page).toHaveURL(/\/alice\/$/)
+  await expect(row).toBeVisible()
+})
+
 for (const fixture of ['layout.html', 'instagram-layout.html']) {
   test(`synthetic layout fixture: ${fixture}`, async ({ page }) => {
     const errors: string[] = []
@@ -79,4 +111,56 @@ test('floating detection releases a launcher moved into normal flow', async ({ p
   await expect(page.locator('#launcher')).toBeHidden()
   await page.locator('#move').click()
   await expect(page.locator('#launcher')).toBeVisible()
+})
+
+test('translated dashboard controls hide without affecting profile layout or inline styles', async ({ page }) => {
+  await page.goto('/tests/browser/floating-dms.html')
+  await page.locator('#dashboard-mode').click()
+  await expect(page.locator('#professional-dashboard')).toBeHidden()
+  await expect(page.locator('#profile-header')).toBeVisible()
+  await expect(page.locator('#edit-profile')).toBeVisible()
+  await expect(page.locator('#nav-notifications')).toBeVisible()
+  await page.locator('#nav-insert').click()
+  await expect(page.locator('#late-dashboard')).toBeHidden()
+  await expect(page.locator('#late-notifications')).toBeVisible()
+  await page.locator('#nav-reset').click()
+  await expect(page.locator('#professional-dashboard')).toBeVisible()
+  expect(await page.locator('#professional-dashboard').evaluate(el => getComputedStyle(el).display)).toBe('inline-flex')
+  await expect(page.locator('#late-dashboard')).toBeVisible()
+})
+
+test('navigation observer uses new settings rather than its initial notification-only state', async ({ page }) => {
+  await page.goto('/tests/browser/floating-dms.html')
+  await page.locator('#notify-mode').click()
+  await expect(page.locator('#nav-notifications')).toBeHidden()
+  await page.locator('#dashboard-mode').click()
+  await expect(page.locator('#nav-notifications')).toBeVisible()
+  await expect(page.locator('#professional-dashboard')).toBeHidden()
+  await page.locator('#nav-insert').click()
+  await expect(page.locator('#late-dashboard')).toBeHidden()
+  await expect(page.locator('#late-notifications')).toBeVisible()
+  await page.locator('#master').click()
+  await expect(page.locator('#professional-dashboard')).toBeVisible()
+  await expect(page.locator('#late-dashboard')).toBeVisible()
+})
+
+test('plain div navigation and dashboard banners hide while sibling actions and display styles survive', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto('/tests/browser/floating-dms.html')
+  await page.locator('#all-nav-mode').click()
+  for (const id of ['nested-notifications', 'unlabelled-notifications', 'plain-dashboard', 'afrikaans-dashboard']) {
+    await expect(page.locator(`#${id}`)).toBeHidden()
+  }
+  for (const id of ['plain-rail', 'plain-home', 'plain-profile-header', 'plain-edit', 'plain-actions', 'plain-saved']) {
+    await expect(page.locator(`#${id}`)).toBeVisible()
+  }
+  await page.locator('#nav-reset').click()
+  for (const id of ['nested-notifications', 'unlabelled-notifications', 'plain-dashboard', 'afrikaans-dashboard']) {
+    await expect(page.locator(`#${id}`)).toBeVisible()
+  }
+  expect(await page.locator('#plain-dashboard').evaluate(el => [
+    getComputedStyle(el).display, (el as HTMLElement).style.getPropertyPriority('display'),
+  ])).toEqual(['flex', 'important'])
+  expect(errors).toEqual([])
 })

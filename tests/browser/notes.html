@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Instagram DM Notes fixture</title>
+  <style>
+    body { font: 16px system-ui; }
+    #notes-row { height: 160px; }
+    #notes-row ul { display: flex; list-style: none; margin: 0; padding: 0; }
+    #notes-row li { position: absolute; }
+    #chats { height: 100px; }
+  </style>
+</head>
+<body>
+  <button id="toggle">Toggle Notes hiding</button>
+  <button id="master">Toggle master</button>
+  <button id="insert">Insert Notes row</button>
+  <button id="navigate">Navigate to profile</button>
+  <main><section id="notes-slot"></section><div id="chats">Conversation list</div><textarea aria-label="Message"></textarea></main>
+  <script type="module">
+    import markup from '../fixtures/instagram-notes.html?raw'
+    import { createDefaultState } from '../../src/config/defaults.ts'
+    import { getActiveRules } from '../../src/content/instagram/rules.ts'
+    import { updateStyles } from '../../src/content/shared/injector.ts'
+    const state = createDefaultState()
+    const apply = () => updateStyles(getActiveRules(state))
+    history.replaceState(null, '', '/direct/inbox/')
+    document.querySelector('#notes-slot').innerHTML = markup
+    document.querySelector('#toggle').onclick = () => {
+      state.instagram.nukeNotes = !state.instagram.nukeNotes
+      apply()
+    }
+    document.querySelector('#master').onclick = () => {
+      state.globalEnabled = !state.globalEnabled
+      apply()
+    }
+    document.querySelector('#insert').onclick = () => {
+      document.querySelector('#notes-slot').innerHTML = markup
+    }
+    document.querySelector('#navigate').onclick = () => {
+      history.pushState(null, '', '/alice/')
+      apply()
+    }
+    apply()
+  </script>
+</body>
+</html>

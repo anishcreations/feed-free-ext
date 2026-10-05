@@ -3,6 +3,7 @@ import { updateStyles, removeAntiflicker } from '../shared/injector'
 import { DOMPatron } from '../shared/patron'
 import { getActiveRules } from './rules'
 import { syncFloatingDMs } from './floating-dms'
+import { syncInstagramNavItems } from './nav-items'
 import { handleRedirect, isProfilePath } from './redirect'
 import type { FeedFreeState } from '../../types'
 
@@ -607,6 +608,7 @@ function applyRules(state: FeedFreeState): void {
   try {
     updateStyles(rules)
     syncFloatingDMs(state)
+    syncInstagramNavItems(state)
     removeAntiflicker()
     if (state.globalEnabled) {
       hideInstagramCommentsJS()
@@ -646,6 +648,7 @@ function setupHeartbeat(): void {
       const rules = getActiveRules(currentState)
       updateStyles(rules)
       syncFloatingDMs(currentState)
+      syncInstagramNavItems(currentState)
       if (currentState.globalEnabled) {
         hideInstagramCommentsJS()
         hideInstagramLikesJS()

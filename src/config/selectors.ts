@@ -755,16 +755,8 @@ export const INSTAGRAM: Record<string, SelectorRule | SelectorRule[]> = {
   ],
   notifications: [
     {
-      selector: 'a[href^="/notifications"]',
-      fallbacks: [
-        'a[href="/notifications/"]',
-        'a:has(svg[aria-label="Notifications"])',
-        'a:has(svg[aria-label="Activity"])',
-        'a:has(svg[aria-label="Heart"])',
-        'div[role="button"]:has(svg[aria-label="Notifications"])',
-        'div[role="button"]:has(svg[aria-label="Activity"])',
-        'div[role="button"]:has(svg[aria-label="Heart"])',
-      ],
+      selector: '[data-ff-notif-hidden]',
+      fallbacks: [],
       property: 'display',
       value: 'none',
     },
@@ -893,6 +885,14 @@ export const INSTAGRAM: Record<string, SelectorRule | SelectorRule[]> = {
       value: 'none',
     }
   ],
+  notesInbox: {
+    // Hide the carousel wrapper, including avatars, music tiles and its arrow.
+    // Combine the virtualized list structure with the known note-bubble wrapper.
+    selector: 'div:has(> div > [role="presentation"][data-interactable] > div > ul > li[style*="translateX("] [role="button"] [role="link"] > img):has(.x1vjfegm.x9a3u73 > .x7wppnt)',
+    fallbacks: [],
+    property: 'display',
+    value: 'none',
+  },
   likes: [
     {
       // Reels likes count
@@ -971,20 +971,12 @@ export const INSTAGRAM: Record<string, SelectorRule | SelectorRule[]> = {
       value: 'none',
     }
   ],
-  dashboard: [
-    {
-      selector: 'a[href*="professional_dashboard" i]',
-      fallbacks: [
-        'a[href*="dashboard" i]',
-        'a[href*="professional-dashboard" i]',
-        'a:has(svg[aria-label*="dashboard" i])',
-        'div:has(> a[href*="dashboard" i])',
-        'li:has(a[href*="dashboard" i])',
-      ],
-      property: 'display',
-      value: 'none',
-    }
-  ]
+  dashboard: {
+    selector: '[data-ff-dashboard-hidden]',
+    fallbacks: [],
+    property: 'display',
+    value: 'none',
+  },
 }
 
 export function getSelectorEntries(
