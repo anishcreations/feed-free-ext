@@ -37,6 +37,14 @@ async function init(): Promise<void> {
     const state = await loadState()
     if (!state.globalEnabled) return
 
+    if (platform === 'youtube' && state.youtube.redirectHomeToSubscriptions) {
+      const path = window.location.pathname
+      if (path === '/' || path === '') {
+        window.location.replace('/feed/subscriptions')
+        return
+      }
+    }
+
     const css = buildAntiflickerCSS(state, platform)
     if (css) injectCSS(css)
   } catch {

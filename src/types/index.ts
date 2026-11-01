@@ -1,8 +1,13 @@
+export type CleanPlayerSize = 'default' | 'wide' | 'full' | 'custom'
+
 export interface YouTubeState {
   nukeHomeFeed: boolean
+  redirectHomeToSubscriptions: boolean
   nukeShorts: boolean
   nukeSidebarRecs: boolean
   centerPlayer: boolean
+  cleanPlayerSize: CleanPlayerSize
+  cleanPlayerCustomWidth: number
   blurThumbnails: boolean
   thumbnailBlurLevel: number
   keepPlaylist: boolean

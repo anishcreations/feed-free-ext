@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+- **YouTube Redirect Home to Subscriptions**: Automatically redirect `youtube.com/` directly to `/feed/subscriptions` without displaying the recommended home feed. Intercepts both direct visits and clicks on the YouTube top-left logo, preserving modifier-key clicks (Ctrl/Cmd/Shift) for opening tabs.
+- **Clean Player Sizing & Native On-Player Button**:
+  - Added size presets under Clean Player: **Default (1120px)**, **Wide (1440px)**, **Full Width**, and **Custom Width** with a numeric pixel input in the popup.
+  - Injected an on-player button into YouTube's native control bar (`.ytp-right-controls` beside Theater and Fullscreen buttons) that cycles through presets on single-click with visual feedback and status toast notifications.
+- Unit tests for YouTube redirect, logo navigation interception, and Clean Player size variations in Vitest.
+
 ## [v1.8.1] - 2026-10-05
 
 ### Fixed

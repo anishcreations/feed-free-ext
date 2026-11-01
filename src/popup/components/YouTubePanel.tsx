@@ -20,6 +20,14 @@ export function YouTubePanel() {
         onChange={(v) => setYouTube({ nukeHomeFeed: v })}
       />
       <Row
+        label="Redirect Home"
+        hint="Automatically redirect youtube.com to Subscriptions feed"
+        checked={state.youtube.redirectHomeToSubscriptions}
+        disabled={disabled}
+        activeColor={activeColor}
+        onChange={(v) => setYouTube({ redirectHomeToSubscriptions: v })}
+      />
+      <Row
         label="Hide Shorts"
         hint="Remove Shorts from sidebar, homepage, and channel pages"
         checked={state.youtube.nukeShorts && state.youtube.nukeShortsFromProfiles}
@@ -68,6 +76,68 @@ export function YouTubePanel() {
           activeColor={activeColor}
           onChange={(v) => setYouTube({ keepPlaylist: v })}
         />
+        {state.youtube.centerPlayer && (
+          <div
+            className="px-[10px] pb-3 pt-1"
+            style={{ borderBottom: '1px solid var(--border)', opacity: disabled ? 0.3 : 1 }}
+          >
+            <div className="flex items-center justify-between text-[11px] mb-2" style={{ color: 'var(--muted)' }}>
+              <span>Player Size</span>
+              <span className="font-semibold tabular-nums" style={{ color: 'var(--text)' }}>
+                {state.youtube.cleanPlayerSize === 'default'
+                  ? 'Default (1120px)'
+                  : state.youtube.cleanPlayerSize === 'wide'
+                  ? 'Wide (1440px)'
+                  : state.youtube.cleanPlayerSize === 'full'
+                  ? 'Full Width'
+                  : `Custom (${state.youtube.cleanPlayerCustomWidth || 1600}px)`}
+              </span>
+            </div>
+            <div className="clean-player-presets">
+              {(['default', 'wide', 'full', 'custom'] as const).map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  disabled={disabled}
+                  aria-pressed={state.youtube.cleanPlayerSize === preset}
+                  className={`clean-player-preset-btn ${state.youtube.cleanPlayerSize === preset ? 'active' : ''}`}
+                  onClick={() => setYouTube({ cleanPlayerSize: preset })}
+                >
+                  {preset === 'default'
+                    ? 'Default'
+                    : preset === 'wide'
+                    ? 'Wide'
+                    : preset === 'full'
+                    ? 'Full'
+                    : 'Custom'}
+                </button>
+              ))}
+            </div>
+            {state.youtube.cleanPlayerSize === 'custom' && (
+              <div className="flex items-center justify-between mt-2 gap-2">
+                <label htmlFor="clean-player-custom-width" className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                  Max width (px)
+                </label>
+                <input
+                  id="clean-player-custom-width"
+                  type="number"
+                  min={600}
+                  max={3840}
+                  step={20}
+                  value={state.youtube.cleanPlayerCustomWidth || 1600}
+                  disabled={disabled}
+                  className="clean-player-custom-input"
+                  onChange={(e) => {
+                    const val = Number(e.currentTarget.value)
+                    if (!Number.isNaN(val)) {
+                      setYouTube({ cleanPlayerCustomWidth: val })
+                    }
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <Row
         label="Blur Thumbnails"

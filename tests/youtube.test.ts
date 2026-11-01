@@ -33,4 +33,23 @@ describe('YouTube feature combinations', () => {
     state.globalEnabled = false
     expect(names(state)).not.toContain('homeFeed')
   })
+  it('updates Clean Player max-width rules across size presets', () => {
+    const state = createDefaultState()
+    state.youtube.centerPlayer = true
+
+    const getCenterRule = () =>
+      getActiveRules(state).find(r => r.name === 'centerPlayer')?.selectors.find(s => s.property === 'max-width')
+
+    expect(getCenterRule()?.value).toContain('1120px')
+
+    state.youtube.cleanPlayerSize = 'wide'
+    expect(getCenterRule()?.value).toContain('1440px')
+
+    state.youtube.cleanPlayerSize = 'full'
+    expect(getCenterRule()?.value).toContain('100%')
+
+    state.youtube.cleanPlayerSize = 'custom'
+    state.youtube.cleanPlayerCustomWidth = 1920
+    expect(getCenterRule()?.value).toContain('1920px')
+  })
 })

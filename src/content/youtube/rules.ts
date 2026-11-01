@@ -1,5 +1,6 @@
 import { normalizeBlurLevel } from '../../config/thumbnailBlur'
 import { getSelectorEntries } from '../../config/selectors'
+import { getCenterPlayerRules } from './layout'
 import type { FeedFreeState, SelectorRule } from '../../types'
 
 export type YouTubeRuleKey =
@@ -103,16 +104,21 @@ export function getActiveRules(state: FeedFreeState): ActiveRule[] {
       selectors: getSelectorEntries('youtube', RULE_MAP.hideWatchPlaylist),
     })
   }
-  for (const name of ['centerPlayer', 'blurThumbnails'] as const) {
-    if (state.youtube[name]) {
-      const selectors = getSelectorEntries('youtube', RULE_MAP[name])
-      rules.push({
-        name,
-        selectors: name === 'blurThumbnails'
-          ? selectors.map(rule => ({ ...rule, value: `blur(${normalizeBlurLevel(state.youtube.thumbnailBlurLevel)}px)` }))
-          : selectors,
-      })
-    }
+  if (state.youtube.centerPlayer) {
+    rules.push({
+      name: 'centerPlayer',
+      selectors: getCenterPlayerRules(state.youtube.cleanPlayerSize, state.youtube.cleanPlayerCustomWidth),
+    })
+  }
+  if (state.youtube.blurThumbnails) {
+    const selectors = getSelectorEntries('youtube', RULE_MAP.blurThumbnails)
+    rules.push({
+      name: 'blurThumbnails',
+      selectors: selectors.map(rule => ({
+        ...rule,
+        value: `blur(${normalizeBlurLevel(state.youtube.thumbnailBlurLevel)}px)`,
+      })),
+    })
   }
   if (state.youtube.nukeComments) {
     rules.push({

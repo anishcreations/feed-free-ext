@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import React from 'react'
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { createDefaultState, STORAGE_KEY } from '../src/config/defaults'
 import { InstagramPanel } from '../src/popup/components/InstagramPanel'
+import { YouTubePanel } from '../src/popup/components/YouTubePanel'
 import { useStore } from '../src/popup/store'
 import { createChromeStorage } from './helpers/chrome'
 
@@ -96,3 +97,35 @@ it.each([false, true])('Hide DMs forces the floating child on, then restores its
   expect(child.disabled).toBe(true)
   expect(child.getAttribute('aria-checked')).toBe(String(preference))
 })
+
+it('toggles YouTube Redirect Home and changes Clean Player size presets', async () => {
+  const user = userEvent.setup()
+  render(<YouTubePanel />)
+
+  const redirectSwitch = screen.getByRole('switch', { name: 'Redirect Home' })
+  expect(redirectSwitch.getAttribute('aria-checked')).toBe('false')
+
+  await user.click(redirectSwitch)
+  await waitFor(() => expect(redirectSwitch.getAttribute('aria-checked')).toBe('true'))
+  expect(api.read(STORAGE_KEY)).toMatchObject({ youtube: { redirectHomeToSubscriptions: true } })
+
+  // Clean Player controls
+  const cleanPlayerSwitch = screen.getByRole('switch', { name: 'Clean Player' })
+  expect(screen.queryByRole('button', { name: 'Wide' })).toBeNull()
+
+  await user.click(cleanPlayerSwitch)
+  const wideBtn = await screen.findByRole('button', { name: 'Wide' })
+  expect(wideBtn).not.toBeNull()
+
+  await user.click(wideBtn)
+  await waitFor(() => expect(api.read(STORAGE_KEY)).toMatchObject({ youtube: { cleanPlayerSize: 'wide' } }))
+
+  const customBtn = screen.getByRole('button', { name: 'Custom' })
+  await user.click(customBtn)
+  const customInput = await screen.findByLabelText('Max width (px)') as HTMLInputElement
+  expect(customInput).not.toBeNull()
+
+  fireEvent.change(customInput, { target: { value: '1800' } })
+  await waitFor(() => expect(api.read(STORAGE_KEY)).toMatchObject({ youtube: { cleanPlayerSize: 'custom', cleanPlayerCustomWidth: 1800 } }))
+})
+

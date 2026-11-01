@@ -5,9 +5,12 @@ export const CURRENT_VERSION = '1.8.1'
 
 export const DEFAULT_YOUTUBE: YouTubeState = {
   nukeHomeFeed: false,
+  redirectHomeToSubscriptions: false,
   nukeShorts: false,
   nukeSidebarRecs: false,
   centerPlayer: false,
+  cleanPlayerSize: 'default',
+  cleanPlayerCustomWidth: 1600,
   blurThumbnails: false,
   thumbnailBlurLevel: DEFAULT_BLUR_LEVEL,
   keepPlaylist: true,

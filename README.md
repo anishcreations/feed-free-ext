@@ -38,10 +38,11 @@ Screenshots show example settings and may not include the latest controls. Store
 
 ### YouTube
 - **Hide Home Feed** — Remove the algorithmic video grid from youtube.com.
+- **Redirect Home** — Automatically redirect youtube.com and top-left logo clicks to your Subscriptions feed (`/feed/subscriptions`) so you land directly on channels you follow.
 - **Hide Shorts** — Remove Shorts from homepage, sidebar, and channel profile pages.
 - **Hide Search Shorts** — Remove Shorts shelves and video results completely from search pages, with a smart auto-dismissing toast at the top-center of the page notifying you when results are hidden.
 - **Hide Recommendations** — Clear suggested recommendations next to/below the player and playlist pages (leaves playlists visible).
-- **Clean Player** — Replace the watch sidebar with a centered player, capped at 1120px and sized to the available height, with responsive side margins and rounded corners. Works in narrow desktop windows; theater, fullscreen, and miniplayer retain native sizing.
+- **Clean Player** — Replace the watch sidebar with a centered player with breathing room and rounded corners. Choose between **Default (1120px)**, **Wide (1440px)**, **Full Width**, or a **Custom (px)** width. Includes a native button on YouTube's player control bar (beside Theater/Fullscreen) to cycle sizes on click with toast feedback. Works in narrow desktop windows; theater, fullscreen, and miniplayer retain native sizing.
 - **Keep Playlist Below Player** — Child option under Clean Player to keep the current playlist beneath the video. Turn it off for a single-player view. Existing Hide Entire Sidebar preferences migrate with playlists hidden.
 - **Blur Thumbnails** — Blur video thumbnails and preview media without blurring titles, avatars, or the playing video. Off by default. When enabled, a slider beneath the toggle adjusts blur strength from 1–24px and remembers your choice.
 - **Hide Comments** — Remove the entire comments section.
@@ -111,9 +112,9 @@ After updating a local build, reload the extension and refresh open YouTube/Inst
 ## Support & Feedback
 
 If you encounter bugs, have feature suggestions, or want to share feedback:
-> **Email**: Contact us at [email address](mailto:anish.creations.hq@gmail.com?subject=[Feed%20Free%20Extension]%20Support%20/%20Feedback). Please keep the prefilled subject line intact.
+> **Email**: Contact at [email address](mailto:[EMAIL_ADDRESS]?subject=[Feed%20Free%20Extension]%20Support%20/%20Feedback). Please keep the prefilled subject line intact.
 >
-> **Site**: You can also contact me directly via [anisharyal09.com.np](https://anisharyal09.com.np/#contact) (for any support, features or bugs)
+> **Site**: You can also contact me directly via [anisharyal09.com.np](https://anisharyal09.com.np/#contact)
 
 
 ---

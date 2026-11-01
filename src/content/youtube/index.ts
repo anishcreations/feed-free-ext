@@ -2,7 +2,8 @@ import { loadState, onStateChanged, pollState, saveState } from '../../utils/sto
 import { updateStyles, removeAntiflicker } from '../shared/injector'
 import { DOMPatron } from '../shared/patron'
 import { getActiveRules } from './rules'
-import type { FeedFreeState } from '../../types'
+import { handleYouTubeRedirect, setupYouTubeLogoInterceptor, updateYouTubeLogoLink } from './redirect'
+import type { CleanPlayerSize, FeedFreeState } from '../../types'
 
 const log = console.log.bind(console, '[FeedFree:YouTube]')
 const err = console.error.bind(console, '[FeedFree:YouTube]')
@@ -536,6 +537,135 @@ function manageMusicOverlay(state: FeedFreeState): void {
   }
 }
 
+function getCleanPlayerIcon(size: CleanPlayerSize): string {
+  if (size === 'wide') {
+    return `<svg viewBox="0 0 36 36" width="100%" height="100%" fill="currentColor"><path d="M6 10h24v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 18h12M12 18l3-3M12 18l3 3M24 18l-3-3M24 18l-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  }
+  if (size === 'full') {
+    return `<svg viewBox="0 0 36 36" width="100%" height="100%" fill="currentColor"><path d="M4 8h28v20H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 13l-3 3 3 3M27 13l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  }
+  // default
+  return `<svg viewBox="0 0 36 36" width="100%" height="100%" fill="currentColor"><path d="M9 10h18v16H9z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2.5" fill="currentColor"/></svg>`
+}
+
+function getCleanPlayerTooltip(size: CleanPlayerSize, customWidth: number): string {
+  switch (size) {
+    case 'wide':
+      return 'Clean Player: Wide 1440px (Click to switch to Full Width)'
+    case 'full':
+      return 'Clean Player: Full Width (Click to switch to Default)'
+    case 'custom':
+      return `Clean Player: Custom ${customWidth}px (Click to switch to Default)`
+    case 'default':
+    default:
+      return 'Clean Player: Default 1120px (Click to switch to Wide)'
+  }
+}
+
+function manageCleanPlayerControlButton(state: FeedFreeState): void {
+  const shouldShow = state.globalEnabled && state.youtube.centerPlayer
+  const existingBtn = document.getElementById('ff-clean-player-btn')
+
+  if (!shouldShow) {
+    existingBtn?.remove()
+    return
+  }
+
+  const rightControls = document.querySelector('.ytp-right-controls')
+  if (!rightControls) {
+    existingBtn?.remove()
+    return
+  }
+
+  const styleId = 'ff-clean-player-btn-style'
+  if (!document.getElementById(styleId)) {
+    const style = document.createElement('style')
+    style.id = styleId
+    style.textContent = `
+      #ff-clean-player-btn {
+        position: relative;
+        width: 48px;
+        height: 100%;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #fff;
+        opacity: 0.9;
+        transition: opacity 0.15s ease, transform 0.15s ease, color 0.15s ease;
+        vertical-align: top;
+      }
+      #ff-clean-player-btn:hover {
+        opacity: 1;
+        color: #3ea6ff;
+        transform: scale(1.08);
+      }
+      #ff-clean-player-btn svg {
+        width: 26px;
+        height: 26px;
+        pointer-events: none;
+      }
+    `
+    document.documentElement.appendChild(style)
+  }
+
+  const currentSize = state.youtube.cleanPlayerSize || 'default'
+  const tooltip = getCleanPlayerTooltip(currentSize, state.youtube.cleanPlayerCustomWidth)
+
+  if (!existingBtn) {
+    const btn = document.createElement('button')
+    btn.id = 'ff-clean-player-btn'
+    btn.className = 'ytp-button'
+    btn.setAttribute('aria-label', tooltip)
+    btn.title = tooltip
+    btn.innerHTML = getCleanPlayerIcon(currentSize)
+
+    btn.onclick = async (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      try {
+        const s = await loadState()
+        const cur = s.youtube.cleanPlayerSize || 'default'
+        const next: CleanPlayerSize = cur === 'default' ? 'wide' : cur === 'wide' ? 'full' : 'default'
+        s.youtube.cleanPlayerSize = next
+        await saveState(s)
+
+        const notificationLabels: Record<CleanPlayerSize, string> = {
+          default: 'Clean Player: Default (1120px) 📺',
+          wide: 'Clean Player: Wide (1440px) 🖥️',
+          full: 'Clean Player: Full Width 🎬',
+          custom: `Clean Player: Custom (${s.youtube.cleanPlayerCustomWidth}px) 📐`,
+        }
+        showFeedFreeToast(notificationLabels[next])
+      } catch (err) {
+        console.error('[FeedFree:YouTube] Failed to cycle cleanPlayerSize:', err)
+      }
+    }
+
+    const sizeButton = rightControls.querySelector('.ytp-size-button, .ytp-fullscreen-button')
+    if (sizeButton) {
+      rightControls.insertBefore(btn, sizeButton)
+    } else {
+      rightControls.appendChild(btn)
+    }
+  } else {
+    if (existingBtn.parentNode !== rightControls) {
+      const sizeButton = rightControls.querySelector('.ytp-size-button, .ytp-fullscreen-button')
+      if (sizeButton) {
+        rightControls.insertBefore(existingBtn, sizeButton)
+      } else {
+        rightControls.appendChild(existingBtn)
+      }
+    }
+    existingBtn.setAttribute('aria-label', tooltip)
+    existingBtn.title = tooltip
+    existingBtn.innerHTML = getCleanPlayerIcon(currentSize)
+  }
+}
+
 function injectShadowStyles(state: FeedFreeState): void {
   if (!state.globalEnabled) return
 
@@ -804,7 +934,10 @@ function applyRules(state: FeedFreeState): void {
   try {
     const stylesChanged = updateStyles(rules)
     removeAntiflicker()
+    handleYouTubeRedirect(state)
+    updateYouTubeLogoLink(state)
     manageMusicOverlay(state)
+    manageCleanPlayerControlButton(state)
     injectShadowStyles(state)
     if (state.globalEnabled) {
       hideYouTubeEndScreensJS()
@@ -843,7 +976,10 @@ function setupHeartbeat(): void {
   heartbeat = setInterval(() => {
     try {
       if (!currentState) return
+      handleYouTubeRedirect(currentState)
+      updateYouTubeLogoLink(currentState)
       manageMusicOverlay(currentState)
+      manageCleanPlayerControlButton(currentState)
       injectShadowStyles(currentState)
       if (currentState.globalEnabled) {
         hideYouTubeEndScreensJS()
@@ -899,6 +1035,8 @@ function onYouTubeNavigate(): void {
   try {
     if (currentState) {
       log('yt-navigate-finish fired, reapplying rules')
+      handleYouTubeRedirect(currentState)
+      updateYouTubeLogoLink(currentState)
       applyRules(currentState)
     }
   } catch (e) {
@@ -1035,6 +1173,9 @@ async function init(): Promise<void> {
       setupHeartbeat()
     }
 
+    setupYouTubeLogoInterceptor(() => currentState)
+    handleYouTubeRedirect(state)
+    updateYouTubeLogoLink(state)
     document.addEventListener('yt-navigate-finish', onYouTubeNavigate)
     document.addEventListener('keydown', handleKeyboardShortcut)
     onStateChanged(handleStateChange)

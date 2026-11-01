@@ -72,7 +72,8 @@ src/
 │   ├── youtube/
 │   │   ├── index.ts        # YouTube content script main logic
 │   │   ├── rules.ts        # YouTube-specific CSS selectors/rules
-│   │   └── layout.ts       # Clean Player layout rules
+│   │   ├── layout.ts       # Clean Player layout rules & size presets
+│   │   └── redirect.ts     # YouTube home and logo redirect to Subscriptions
 │   └── instagram/
 │       ├── index.ts        # Instagram content script main logic
 │       ├── rules.ts        # Instagram-specific CSS selectors/rules
